@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NumeroLogic - Energy Analysis</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner"></div>
+        <div class="loading-text">Analyzing Energy Patterns...</div>
+        <div class="loading-subtext">Decoding your star composition</div>
+    </div>
+
+    <div class="page-wrapper">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                    <path d="M2 17l10 5 10-5"/>
+                    <path d="M2 12l10 5 10-5"/>
+                </svg>
+            </div>
+            <h1>NumeroLogic</h1>
+            <p class="subtitle">Discover the hidden energy patterns within your numbers using the Eight Star Magnetic Field system</p>
+        </div>
+
+        <!-- Main Input Card -->
+        <div class="main-card">
+            <label class="input-label">Enter Your Number</label>
+            <div class="input-wrapper">
+                <span class="input-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                    </svg>
+                </span>
+                <input type="text" id="phoneInput" pattern="\d*">
+            </div>
+            <p class="input-hint">Enter any format - we'll analyze the digits for you</p>
+
+            <!-- Gender Toggle -->
+            <div class="gender-section">
+                <label class="input-label">Select Gender</label>
+                <div class="gender-toggle-container">
+                    <button id="maleBtn" class="gender-btn male-btn active" onclick="setGender('male')">
+                        <span>♂</span> Male 男
+                    </button>
+                    <button id="femaleBtn" class="gender-btn female-btn" onclick="setGender('female')">
+                        <span>♀</span> Female 女
+                    </button>
+                </div>
+                <p class="gender-info-text" id="genderInfo">Yang patterns (14/41, 13/31, 68/86, 79/97) provide stronger benefits</p>
+            </div>
+
+            <!-- Analyze Button -->
+            <button id="analyzeBtn" class="analyze-btn" onclick="runFullReport()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                </svg>
+                Analyze Number
+            </button>
+
+            <!-- Feature Cards -->
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">✨</div>
+                    <div>
+                        <div class="feature-title">Energy Analysis</div>
+                        <div class="feature-desc">Decode the vibrational frequency</div>
+                    </div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📈</div>
+                    <div>
+                        <div class="feature-title">Fortune Reading</div>
+                        <div class="feature-desc">Learn your number's energy</div>
+                    </div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <div>
+                        <div class="feature-title">Instant Results</div>
+                        <div class="feature-desc">Get detailed insights fast</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results" class="results-section hidden">
+            
+            <div class="score-header">
+                <div id="scoreCircle" class="score-circle">--</div>
+                <div class="score-text-block">
+                    <div class="score-title">Energy Profile Score</div>
+                    <div class="score-sub" id="scoreSub">Weighted calculation of your star path</div>
+                    <div id="genderIndicator" class="gender-indicator male">♂ Analyzing for Male (阳男)</div>
+                </div>
+            </div>
+            
+            <div class="section-title">⭐ Star Composition Analysis</div>
+            <p class="section-subtitle">Your number decoded into the Eight Star energy patterns</p>
+            <div id="flowContainer" class="flow-container"></div>
+
+            <div id="narrativeContainer"></div>
+
+            <div class="section-title">🎯 Strategic Recommendations</div>
+            <p class="section-subtitle">Actionable insights based on your complete energy profile</p>
+            <div id="strategicContainer" class="narrative-card"></div>
+
+            <div class="section-title" style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb;">Reference Chart 数字磁场表</div>
+            <p class="section-subtitle">阳刚 (Yang): Columns 1-2 | 阴柔 (Yin): Columns 3-4</p>
+            <div class="ref-table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Star 八星</th>
+                            <th>Key Traits 主特质</th>
+                            <th style="background:#fef2f2; color:#dc2626;">1 最强<br><span style="font-size:9px;">Strongest</span></th>
+                            <th style="background:#fff7ed; color:#ea580c;">2 强<br><span style="font-size:9px;">Strong</span></th>
+                            <th style="background:#eff6ff; color:#2563eb;">3 较弱<br><span style="font-size:9px;">Weak</span></th>
+                            <th style="background:#f8fafc; color:#64748b;">4 最弱<br><span style="font-size:9px;">Weakest</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="text-good"><strong>生气 Sheng Qi</strong></td>
+                            <td>贵人, 人缘, 开朗, 随缘<br><span style="color:#6b7280; font-size:10px;">Nobles, Popularity, Cheerful, Easygoing</span></td>
+                            <td class="num-group">14/41</td>
+                            <td class="num-group">67/76</td>
+                            <td class="num-group">39/93</td>
+                            <td class="num-group">28/82</td>
+                        </tr>
+                        <tr>
+                            <td class="text-good"><strong>天医 Tian Yi</strong></td>
+                            <td>财富, 聪明, 婚姻, 善良<br><span style="color:#6b7280; font-size:10px;">Wealth, Smart, Marriage, Kind</span></td>
+                            <td class="num-group">13/31</td>
+                            <td class="num-group">68/86</td>
+                            <td class="num-group">49/94</td>
+                            <td class="num-group">27/72</td>
+                        </tr>
+                        <tr>
+                            <td class="text-good"><strong>延年 Yan Nian</strong></td>
+                            <td>领导, 事业, 成功, 健康<br><span style="color:#6b7280; font-size:10px;">Leadership, Career, Success, Health</span></td>
+                            <td class="num-group">19/91</td>
+                            <td class="num-group">78/87</td>
+                            <td class="num-group">34/43</td>
+                            <td class="num-group">26/62</td>
+                        </tr>
+                        <tr>
+                            <td class="text-good"><strong>伏位 Fu Wei</strong></td>
+                            <td>等待, 保守, 被动, 思考<br><span style="color:#6b7280; font-size:10px;">Waiting, Conservative, Passive, Thinking</span></td>
+                            <td class="num-group">11/22</td>
+                            <td class="num-group">88/99</td>
+                            <td class="num-group">66/77</td>
+                            <td class="num-group">33/44</td>
+                        </tr>
+                        <tr style="border-top: 2px solid #e5e7eb;">
+                            <td class="text-bad"><strong>六煞 Liu Sha</strong></td>
+                            <td>桃花, 人际, 情绪, 纠葛<br><span style="color:#6b7280; font-size:10px;">Charm, Social, Emotional, Entangled</span></td>
+                            <td class="num-group">16/61</td>
+                            <td class="num-group">47/74</td>
+                            <td class="num-group">38/83</td>
+                            <td class="num-group">29/92</td>
+                        </tr>
+                        <tr>
+                            <td class="text-bad"><strong>祸害 Huo Hai</strong></td>
+                            <td>口才, 铁齿, 暴躁, 病痛<br><span style="color:#6b7280; font-size:10px;">Eloquent, Stubborn, Irritable, Illness</span></td>
+                            <td class="num-group">17/71</td>
+                            <td class="num-group">89/98</td>
+                            <td class="num-group">46/64</td>
+                            <td class="num-group">23/32</td>
+                        </tr>
+                        <tr>
+                            <td class="text-bad"><strong>五鬼 Wu Gui</strong></td>
+                            <td>智慧, 才华, 变化, 凶险<br><span style="color:#6b7280; font-size:10px;">Wisdom, Talent, Change, Danger</span></td>
+                            <td class="num-group">18/81</td>
+                            <td class="num-group">79/97</td>
+                            <td class="num-group">36/63</td>
+                            <td class="num-group">24/42</td>
+                        </tr>
+                        <tr>
+                            <td class="text-bad"><strong>绝命 Jue Ming</strong></td>
+                            <td>投资, 极端, 直爽, 孤独<br><span style="color:#6b7280; font-size:10px;">Investment, Extreme, Straightforward, Lonely</span></td>
+                            <td class="num-group">12/21</td>
+                            <td class="num-group">69/96</td>
+                            <td class="num-group">48/84</td>
+                            <td class="num-group">37/73</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div style="margin-top: 15px; padding: 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 13px; color: #374151;">
+                <strong style="color:#0ea5e9; display:block; margin-bottom:8px;">SPECIAL RULES 特殊规则:</strong>
+                <ul style="margin: 0; padding-left: 20px; line-height: 2;">
+                    <li><strong>Strength Levels 能量强度:</strong> 最强 (Strongest) → 强 (Strong) → 较弱 (Weak) → 最弱 (Weakest). Energy decreases from level 1 to 4.</li>
+                    <li><strong>0 (Zero) 零:</strong> Represents 灵/零/坑/被困 (spirit/empty/pit/trapped). In <span class="text-bad">凶星 (bad stars)</span>, 0 makes negative effects STRONGER but HIDDEN. In <span class="text-good">吉星 (good stars)</span>, 0 SUPPRESSES the benefits—good luck doesn't show.</li>
+                    <li><strong>5 (Five) 五:</strong> Acts as bridge & amplifier. Makes ALL energy MANIFEST clearly and quickly. In <span class="text-good">吉星</span>, amplifies good fortune. In <span class="text-bad">凶星</span>, ⚠️ accelerates problems!</li>
+                    <li><strong>Double/Triple Stars 叠星:</strong> Consecutive same stars compound the energy exponentially. Double 五鬼 (双五鬼) = extreme volatility.</li>
+                    <li><strong>Ending Position 结尾:</strong> The LAST star carries 2x weight—it determines final outcome. 绝命 at end = 留不住钱 (can't keep money).</li>
+                    <li><strong>Key Principle 核心原则:</strong> "吉星用不好是凶星，凶星用得好是吉星" — Good stars used poorly become bad; bad stars used well become good!</li>
+                </ul>
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            Based on the Eight Star Magnetic Field (八星磁场) numerology system
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+</body>
+</html>
