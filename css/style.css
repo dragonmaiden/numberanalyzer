@@ -1,3 +1,23 @@
+        /* CSS Variables for Theming */
+        :root {
+            --color-primary: #14b8a6;
+            --color-primary-dark: #0ea5e9;
+            --color-success: #10b981;
+            --color-success-dark: #047857;
+            --color-danger: #ef4444;
+            --color-danger-dark: #dc2626;
+            --color-warning: #f59e0b;
+            --color-neutral: #6b7280;
+            --color-text-primary: #1e293b;
+            --color-text-secondary: #64748b;
+            --color-bg-primary: #ffffff;
+            --color-bg-secondary: #f8fafc;
+            --color-border: #e5e7eb;
+            --gradient-primary: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+            --gradient-success: linear-gradient(135deg, var(--color-success) 0%, var(--color-success-dark) 100%);
+            --gradient-danger: linear-gradient(135deg, var(--color-danger) 0%, #f97316 100%);
+        }
+
         * { box-sizing: border-box; margin: 0; padding: 0; }
         
         html, body { 
@@ -8,7 +28,7 @@
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background: linear-gradient(135deg, #e0f2fe 0%, #f0fdfa 50%, #ecfdf5 100%);
-            color: #1e293b;
+            color: var(--color-text-primary);
             min-height: 100vh;
             padding: 20px;
         }
@@ -326,18 +346,18 @@
             font-size: 32px;
             font-weight: 700;
             color: white;
-            background: linear-gradient(135deg, #14b8a6 0%, #0ea5e9 100%);
+            background: var(--gradient-primary);
             box-shadow: 0 4px 20px rgba(20, 184, 166, 0.3);
             flex-shrink: 0;
         }
 
         .score-circle.bad {
-            background: linear-gradient(135deg, #ef4444 0%, #f97316 100%);
+            background: var(--gradient-danger);
             box-shadow: 0 4px 20px rgba(239, 68, 68, 0.3);
         }
 
         .score-circle.neutral {
-            background: linear-gradient(135deg, #6b7280 0%, #9ca3af 100%);
+            background: linear-gradient(135deg, var(--color-neutral) 0%, #9ca3af 100%);
             box-shadow: 0 4px 20px rgba(107, 114, 128, 0.3);
         }
 
@@ -374,6 +394,153 @@
         .gender-indicator.female {
             background: #fce7f3;
             color: #be185d;
+        }
+
+        /* Life Balance Dashboard */
+        .life-balance-dashboard {
+            margin: 30px 0;
+            padding: 25px;
+            background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+            border-radius: 20px;
+            border: 1px solid var(--color-border);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .dashboard-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--color-text-primary);
+            margin-bottom: 20px;
+            text-align: center;
+            letter-spacing: 0.5px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .balance-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            border: 2px solid var(--color-border);
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .balance-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border-color: var(--color-primary);
+        }
+
+        .balance-card[data-category="wealth"] {
+            border-left: 4px solid #f59e0b;
+        }
+
+        .balance-card[data-category="career"] {
+            border-left: 4px solid #3b82f6;
+        }
+
+        .balance-card[data-category="relationships"] {
+            border-left: 4px solid #ec4899;
+        }
+
+        .balance-card[data-category="health"] {
+            border-left: 4px solid #10b981;
+        }
+
+        .balance-icon {
+            font-size: 32px;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .balance-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--color-text-primary);
+            text-align: center;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            min-height: 20px;
+        }
+
+        .balance-bar-container {
+            position: relative;
+            margin-top: 8px;
+            padding-top: 24px;
+        }
+
+        .balance-bar {
+            width: 100%;
+            height: 12px;
+            background: #e5e7eb;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .balance-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .balance-card[data-category="wealth"] .balance-fill {
+            background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%);
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
+        }
+
+        .balance-card[data-category="career"] .balance-fill {
+            background: linear-gradient(90deg, #3b82f6 0%, #60a5fa 100%);
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.4);
+        }
+
+        .balance-card[data-category="relationships"] .balance-fill {
+            background: linear-gradient(90deg, #ec4899 0%, #f472b6 100%);
+            box-shadow: 0 0 10px rgba(236, 72, 153, 0.4);
+        }
+
+        .balance-card[data-category="health"] .balance-fill {
+            background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+        }
+
+        .balance-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                rgba(255, 255, 255, 0.3) 50%, 
+                transparent 100%);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .balance-percentage {
+            position: absolute;
+            top: 0;
+            right: 0;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--color-text-primary);
+            font-variant-numeric: tabular-nums;
+            line-height: 1;
         }
 
         /* Section Titles */
@@ -618,12 +785,13 @@
         }
 
         .flow-ref {
-            background: #f1f5f9;
+            background: #f3f4f6;
+            color: #1f2937;
             padding: 3px 8px;
             border-radius: 6px;
             font-family: monospace;
             font-size: 12px;
-            color: #cbd5e1;
+            font-weight: 600;
         }
 
         /* Combo Arrow */
@@ -945,7 +1113,7 @@
             line-height: 1.6;
         }
 
-        /* Mobile */
+        /* Mobile First: Responsive Design */
         @media (max-width: 600px) {
             body { padding: 15px; }
             
@@ -1000,5 +1168,37 @@
 
             .train-car-digits {
                 font-size: 18px;
+            }
+
+            /* Life Balance Dashboard Mobile */
+            .life-balance-dashboard {
+                margin: 20px 0;
+                padding: 20px 15px;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .balance-card {
+                padding: 16px;
+            }
+
+            .balance-icon {
+                font-size: 28px;
+            }
+
+            .balance-label {
+                font-size: 13px;
+            }
+
+            .balance-bar-container {
+                padding-top: 24px;
+            }
+
+            .balance-percentage {
+                font-size: 14px;
+                top: 0;
             }
         }

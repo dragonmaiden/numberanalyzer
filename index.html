@@ -102,6 +102,53 @@
                     <div id="genderIndicator" class="gender-indicator male">♂ Analyzing for Male (阳男)</div>
                 </div>
             </div>
+
+            <!-- Life Balance Dashboard -->
+            <div id="lifeBalanceDashboard" class="life-balance-dashboard">
+                <div class="dashboard-title">⚖️ Life Balance Dashboard</div>
+                <div class="dashboard-grid">
+                    <div class="balance-card" data-category="wealth">
+                        <div class="balance-icon">💰</div>
+                        <div class="balance-label">Wealth</div>
+                        <div class="balance-bar-container">
+                            <div class="balance-bar" id="wealth-bar">
+                                <div class="balance-fill" style="width: 0%"></div>
+                            </div>
+                            <div class="balance-percentage" id="wealth-percentage">0%</div>
+                        </div>
+                    </div>
+                    <div class="balance-card" data-category="career">
+                        <div class="balance-icon">💼</div>
+                        <div class="balance-label">Career</div>
+                        <div class="balance-bar-container">
+                            <div class="balance-bar" id="career-bar">
+                                <div class="balance-fill" style="width: 0%"></div>
+                            </div>
+                            <div class="balance-percentage" id="career-percentage">0%</div>
+                        </div>
+                    </div>
+                    <div class="balance-card" data-category="relationships">
+                        <div class="balance-icon">❤️</div>
+                        <div class="balance-label">Relationships</div>
+                        <div class="balance-bar-container">
+                            <div class="balance-bar" id="relationships-bar">
+                                <div class="balance-fill" style="width: 0%"></div>
+                            </div>
+                            <div class="balance-percentage" id="relationships-percentage">0%</div>
+                        </div>
+                    </div>
+                    <div class="balance-card" data-category="health">
+                        <div class="balance-icon">🏥</div>
+                        <div class="balance-label">Health</div>
+                        <div class="balance-bar-container">
+                            <div class="balance-bar" id="health-bar">
+                                <div class="balance-fill" style="width: 0%"></div>
+                            </div>
+                            <div class="balance-percentage" id="health-percentage">0%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             
             <div class="section-title">⭐ Star Composition Analysis</div>
             <p class="section-subtitle">Your number decoded into the Eight Star energy patterns</p>
@@ -110,7 +157,6 @@
             <div id="narrativeContainer"></div>
 
             <div class="section-title">🎯 Strategic Recommendations</div>
-            <p class="section-subtitle">Actionable insights based on your complete energy profile</p>
             <div id="strategicContainer" class="narrative-card"></div>
 
             <button id="copyBtn" class="copy-btn hidden">

@@ -32,22 +32,34 @@
             analyzeBtn.disabled = true;
             analyzeBtn.textContent = 'Analyzing...';
             loadingOverlay.classList.add('active');
-    copyBtn.classList.add('hidden');
+            copyBtn.classList.add('hidden');
             
-    // Run analysis after 1 second
+            // Run analysis after 1 second to show loading animation
             setTimeout(() => {
-                results.classList.remove('hidden');
+                try {
                 runFlowAndAnalysis(input);
-                
-                // Hide loading spinner and re-enable button
+                    results.classList.remove('hidden');
+                } catch (error) {
+                    console.error('Analysis error:', error);
+                    console.error('Error stack:', error.stack);
+                    console.error('Error at:', error.message, error.name);
+                    // Show detailed error in console, simple message to user
+                    alert(`Error: ${error.message}\n\nCheck browser console (F12) for details.`);
+                    // Don't show results if there was an error
+                    results.classList.add('hidden');
+                } finally {
+                    // Always hide loading spinner and re-enable button, even on error
                 loadingOverlay.classList.remove('active');
                 analyzeBtn.disabled = false;
                 analyzeBtn.textContent = 'Analyze';
-        copyBtn.classList.remove('hidden');
+                    copyBtn.classList.remove('hidden');
                 
-                // Scroll to results
+                    // Only scroll if results are visible
+                    if (!results.classList.contains('hidden')) {
                 results.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 1000);
+                    }
+                }
+            }, 1000); // 1 second animation duration
         }
 
         function runFlowAndAnalysis(input) {
@@ -227,11 +239,15 @@
         genderIndicator.className = 'gender-indicator female';
     }
 
+    // Calculate and render Life Balance Dashboard
+    const balanceScores = calculateLifeBalance(starsFound, selectedGender);
+    renderLifeBalanceDashboard(balanceScores);
+
     generateDeepNarrative(input, starsFound, starsFound[starsFound.length - 1], combosFound, totalScore, narrativeContainer);
 }
 
 function createTrainVisualization(stars, container) {
-    const trainContainer = document.createElement('div');
+                const trainContainer = document.createElement('div');
     trainContainer.className = 'train-container-enhanced';
     
     const trainHeader = document.createElement('div');
@@ -240,8 +256,8 @@ function createTrainVisualization(stars, container) {
     
     const trainRow = document.createElement('div');
     trainRow.className = 'train-row';
-    
-    stars.forEach((star, idx) => {
+                
+                stars.forEach((star, idx) => {
                     const isDark = star.strength === 'strongest' || star.strength === 'strong';
         const prevSameStar = idx > 0 && stars[idx-1].n === star.n;
         const nextSameStar = idx < stars.length - 1 && stars[idx+1].n === star.n;
@@ -283,7 +299,7 @@ function createTrainVisualization(stars, container) {
                 arrow.classList.add('good-transition');
             } else if (prevStar.p === 'good' && nextStar.p === 'bad') {
                 arrow.classList.add('bad-transition');
-            } else {
+                        } else {
                 arrow.classList.add('neutral-transition');
             }
             
@@ -336,8 +352,8 @@ function createPhaseSection(title, subtitle, emoji, phaseStars, phaseClass) {
                 }
                 
 function createStarCard(star) {
-    const div = document.createElement('div');
-    const isDark = star.strength === 'strongest' || star.strength === 'strong';
+                    const div = document.createElement('div');
+                    const isDark = star.strength === 'strongest' || star.strength === 'strong';
     
     div.className = `star-card ${star.p} ${isDark ? 'dark' : ''}`;
     
@@ -374,13 +390,13 @@ function createStarCard(star) {
     const tagsContainer = document.createElement('div');
     tagsContainer.className = 'star-card-tags';
     
-    const strengthEnglish = {
-        '最强': 'Strongest',
-        '强': 'Strong', 
-        '较弱': 'Weak',
-        '最弱': 'Weakest'
-    };
-    
+                    const strengthEnglish = {
+                        '最强': 'Strongest',
+                        '强': 'Strong', 
+                        '较弱': 'Weak',
+                        '最弱': 'Weakest'
+                    };
+                    
     const strengthTag = document.createElement('span');
     strengthTag.className = `tag tag-${star.strength}`;
     strengthTag.textContent = `${star.strengthCn} ${strengthEnglish[star.strengthCn] || ''}`;
@@ -416,9 +432,9 @@ function createStarCard(star) {
     div.appendChild(digitsContainer);
     div.appendChild(tagsContainer);
     
-    return div;
-}
-
+                    return div;
+                }
+                
 function getMissingStarsAnalysis(foundStars) {
     const allStarTypes = ['Tian Yi', 'Sheng Qi', 'Yan Nian', 'Fu Wei', 'Wu Gui', 'Huo Hai', 'Liu Sha', 'Jue Ming'];
     const foundStarTypes = new Set(foundStars.map(s => s.n));
@@ -430,6 +446,116 @@ function getMissingStarsAnalysis(foundStars) {
     }));
         }
 
+        /**
+         * Analyze Sequence - Contextual Chain Analysis Helper
+         * Analyzes energy transitions between consecutive star pairs
+         * Separation of Concerns: Pure analysis logic, no DOM manipulation
+         * 
+         * @param {Array} pairs - Array of star objects with their positions
+         * @returns {Array} Array of transition analysis objects
+         */
+        function analyzeSequence(pairs) {
+            const transitions = [];
+            
+            for (let i = 0; i < pairs.length - 1; i++) {
+                const currentPair = pairs[i];
+                const nextPair = pairs[i + 1];
+                const comboKey = currentPair.n + "+" + nextPair.n;
+                const comboEffect = comboMap[comboKey];
+                
+                // Determine transition type
+                let transitionType = 'neutral';
+                let transitionIntensity = 'moderate';
+                
+                if (currentPair.p === 'good' && nextPair.p === 'bad') {
+                    transitionType = 'drain';
+                    transitionIntensity = 'severe';
+                } else if (currentPair.p === 'bad' && nextPair.p === 'good') {
+                    transitionType = 'redemption';
+                    transitionIntensity = 'positive';
+                } else if (currentPair.p === 'good' && nextPair.p === 'good') {
+                    transitionType = 'amplification';
+                    transitionIntensity = 'strong';
+                } else if (currentPair.p === 'bad' && nextPair.p === 'bad') {
+                    transitionType = 'compounding';
+                    transitionIntensity = 'dangerous';
+                }
+                
+                // Check for special modifier patterns (0 or 5)
+                let specialNote = null;
+                if (currentPair.hasZero && currentPair.p === 'bad') {
+                    specialNote = `The 0 modifier in ${currentPair.displayDigits} makes the negative effects of ${currentPair.n} (${starChinese[currentPair.n]}) stronger but hidden—be vigilant.`;
+                } else if (currentPair.hasZero && currentPair.p === 'good') {
+                    specialNote = `The 0 modifier in ${currentPair.displayDigits} suppresses the benefits of ${currentPair.n} (${starChinese[currentPair.n]})—good luck may not manifest clearly.`;
+                } else if (currentPair.hasFive) {
+                    specialNote = `The 5 modifier in ${currentPair.displayDigits} amplifies ${currentPair.n} (${starChinese[currentPair.n]}) energy—effects manifest quickly and clearly.`;
+                }
+                
+                transitions.push({
+                    from: currentPair,
+                    to: nextPair,
+                    comboKey: comboKey,
+                    comboEffect: comboEffect,
+                    transitionType: transitionType,
+                    transitionIntensity: transitionIntensity,
+                    position: i + 1,
+                    specialNote: specialNote
+                });
+            }
+            
+            return transitions;
+        }
+
+        /**
+         * Detect Special Patterns - Looks for significant triplets or special combinations
+         * 
+         * @param {Array} stars - Array of all star objects
+         * @returns {Array} Array of detected special patterns
+         */
+        function detectSpecialPatterns(stars) {
+            const patterns = [];
+            
+            // Check for triple consecutive patterns
+            for (let i = 0; i < stars.length - 2; i++) {
+                const triple = stars.slice(i, i + 3);
+                
+                // Check for "Five Ghosts Carrying Wealth" pattern (Wu Gui -> Tian Yi)
+                if (triple[0].n === 'Wu Gui' && triple[1].n === 'Tian Yi') {
+                    patterns.push({
+                        type: 'special_combo',
+                        name: '五鬼带财 (Five Ghosts Carrying Wealth)',
+                        description: 'Wu Gui (五鬼) followed by Tian Yi (天医) creates a pattern where unpredictable changes lead to unexpected wealth gains.',
+                        stars: triple.slice(0, 2),
+                        position: i + 1
+                    });
+                }
+                
+                // Check for "Wealth to Loss" pattern (Tian Yi/Sheng Qi -> Jue Ming)
+                if ((triple[0].n === 'Tian Yi' || triple[0].n === 'Sheng Qi') && triple[1].n === 'Jue Ming') {
+                    patterns.push({
+                        type: 'warning',
+                        name: '财来财去 (Wealth Comes and Goes)',
+                        description: `${triple[0].n} (${starChinese[triple[0].n]}) followed by Jue Ming (绝命) suggests wealth generation but difficulty retaining it.`,
+                        stars: triple.slice(0, 2),
+                        position: i + 1
+                    });
+                }
+                
+                // Check for triple same-star (very powerful)
+                if (triple[0].n === triple[1].n && triple[1].n === triple[2].n) {
+                    patterns.push({
+                        type: 'amplification',
+                        name: `Triple ${triple[0].n} (三${starChinese[triple[0].n]})`,
+                        description: `Three consecutive ${triple[0].n} (${starChinese[triple[0].n]}) patterns create extreme energy concentration—this is a rare and powerful configuration.`,
+                        stars: triple,
+                        position: i + 1
+                    });
+                }
+            }
+            
+            return patterns;
+        }
+
         function generateDeepNarrative(input, stars, lastStar, combos, score, container) {
             container.innerHTML = "";
 
@@ -437,6 +563,10 @@ function getMissingStarsAnalysis(foundStars) {
                 container.innerHTML = "<div class='narrative-text'>Not enough valid digit pairs to generate a complete analysis. Please enter a longer number.</div>";
                 return;
             }
+
+            // Perform contextual chain analysis
+            const sequenceAnalysis = analyzeSequence(stars);
+            const specialPatterns = detectSpecialPatterns(stars);
 
     // Detect consecutive same-star runs
             let consecutiveRuns = [];
@@ -459,6 +589,16 @@ function getMissingStarsAnalysis(foundStars) {
                 }
             }
 
+    // Define star type arrays for analysis
+            let tianYiStars = stars.filter(s => s.n === 'Tian Yi');
+            let shengQiStars = stars.filter(s => s.n === 'Sheng Qi');
+            let yanNianStars = stars.filter(s => s.n === 'Yan Nian');
+            let jueMingStars = stars.filter(s => s.n === 'Jue Ming');
+            let wuGuiStars = stars.filter(s => s.n === 'Wu Gui');
+            let liuShaStars = stars.filter(s => s.n === 'Liu Sha');
+            let huoHaiStars = stars.filter(s => s.n === 'Huo Hai');
+            let fuWeiStars = stars.filter(s => s.n === 'Fu Wei');
+            
     // Missing Energy Analysis
     const missingStars = getMissingStarsAnalysis(stars);
     if (missingStars.length > 0) {
@@ -490,220 +630,501 @@ function getMissingStarsAnalysis(foundStars) {
         container.appendChild(blindSpotsCard);
     }
 
-    // Executive Summary (keeping existing logic but with CSS classes)
-            let summaryText = "";
-            let goodCount = stars.filter(s => s.p === 'good').length;
-            let badCount = stars.filter(s => s.p === 'bad').length;
+    // Special Patterns - styled like Blind Spots but with different color (purple/blue theme)
+    if (specialPatterns.length > 0) {
+        const specialPatternsCard = document.createElement('div');
+        specialPatternsCard.className = 'blind-spots-card';
+        specialPatternsCard.style.background = 'linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%)';
+        specialPatternsCard.style.borderColor = '#6366f1';
+        
+        const title = document.createElement('div');
+        title.className = 'blind-spots-title';
+        title.style.color = '#4338ca';
+        title.innerHTML = '🌟 Special Patterns Detected';
+        specialPatternsCard.appendChild(title);
+        
+        specialPatterns.forEach(pattern => {
+            const item = document.createElement('div');
+            item.className = 'blind-spots-item';
+            item.style.borderLeftColor = '#6366f1';
             
-            let genderLabel = selectedGender === 'male' ? '阳男 (Yang Male)' : '阴女 (Yin Female)';
-            let genderIcon = selectedGender === 'male' ? '♂' : '♀';
-            let yangCount = stars.filter(s => s.yinyang === 'yang').length;
-            let yinCount = stars.filter(s => s.yinyang === 'yin').length;
+            const itemTitle = document.createElement('div');
+            itemTitle.className = 'blind-spots-item-title';
+            itemTitle.style.color = '#3730a3';
+            const icon = pattern.type === 'warning' ? '⚠️' : (pattern.type === 'amplification' ? '✨' : '🔮');
+            itemTitle.textContent = `${icon} ${pattern.name}`;
             
-            let tianYiStars = stars.filter(s => s.n === 'Tian Yi');
-            let shengQiStars = stars.filter(s => s.n === 'Sheng Qi');
-            let yanNianStars = stars.filter(s => s.n === 'Yan Nian');
-            let jueMingStars = stars.filter(s => s.n === 'Jue Ming');
-            let wuGuiStars = stars.filter(s => s.n === 'Wu Gui');
-            let liuShaStars = stars.filter(s => s.n === 'Liu Sha');
-            let huoHaiStars = stars.filter(s => s.n === 'Huo Hai');
-            let fuWeiStars = stars.filter(s => s.n === 'Fu Wei');
+            const itemDesc = document.createElement('div');
+            itemDesc.className = 'blind-spots-item-desc';
+            itemDesc.style.color = '#4338ca';
+            const positions = pattern.stars.map(s => s.displayDigits).join(' → ');
+            itemDesc.innerHTML = `<strong>Description:</strong> ${pattern.description}<br><strong>Found at:</strong> <code style="background: rgba(0,0,0,0.05); padding: 2px 6px; border-radius: 3px; font-family: monospace;">${positions}</code>`;
             
-    summaryText += `<div class="narrative-text">`;
-    summaryText += `<p>As a <strong>${genderIcon} ${genderLabel}</strong>, your number <strong>${input}</strong> carries `;
-            
-            if (goodCount > badCount) {
-        summaryText += `<span class="text-good">predominantly auspicious energy</span> with ${goodCount} favorable stars versus ${badCount} challenging ones. `;
-            } else if (badCount > goodCount) {
-        summaryText += `<span class="text-bad">significant challenges</span> with ${badCount} difficult stars versus ${goodCount} favorable ones—requiring strategic navigation. `;
-            } else {
-                summaryText += `balanced energy with equal measures of opportunity and challenge. `;
-            }
-            
-            if (selectedGender === 'male') {
-                if (yangCount > yinCount) {
-                    summaryText += `The Yang-dominant composition (${yangCount} Yang vs ${yinCount} Yin) resonates well with your male energy, amplifying your natural strengths.`;
-                } else if (yinCount > yangCount) {
-                    summaryText += `However, the Yin-dominant composition (${yinCount} Yin vs ${yangCount} Yang) may feel somewhat subdued for male energy—consider pairing with Yang-heavy associates or environments.`;
-                } else {
-                    summaryText += `The balanced Yin-Yang ratio provides moderate compatibility with your male energy.`;
-                }
-            } else {
-                if (yinCount > yangCount) {
-                    summaryText += `The Yin-dominant composition (${yinCount} Yin vs ${yangCount} Yang) harmonizes beautifully with your female energy.`;
-                } else if (yangCount > yinCount) {
-                    summaryText += `However, the Yang-dominant composition (${yangCount} Yang vs ${yinCount} Yin) carries strong assertive energy—excellent for career, but may require conscious softening in relationships.`;
-                } else {
-                    summaryText += `The balanced Yin-Yang ratio provides versatile energy for both career and relationships.`;
-                }
-            }
-            summaryText += `</p>`;
-            
-    // Continue with existing narrative generation logic...
-    // (Keeping the rest of the narrative generation similar but using CSS classes)
-    
-            summaryText += `</div>`;
-            createNarrativeCard("📊 Executive Summary", summaryText, container);
-
-    // Wealth Analysis
-            let wealthText = "";
-            let doubleTianYi = consecutiveRuns.find(r => r.star === 'Tian Yi');
-            let doubleJueMing = consecutiveRuns.find(r => r.star === 'Jue Ming');
-            let doubleWuGui = consecutiveRuns.find(r => r.star === 'Wu Gui');
-
-            if (doubleTianYi) {
-                let runName = doubleTianYi.count === 2 ? 'Double' : (doubleTianYi.count === 3 ? 'Triple' : `${doubleTianYi.count}x`);
-                wealthText += `<div class="insight-box"><strong>🌟 ${runName} Tian Yi (${starChinese['Tian Yi'].repeat(doubleTianYi.count)}) - Exceptional Wealth Configuration</strong><br>`;
-                wealthText += `<p>This is one of the most favorable wealth patterns possible. The Heavenly Doctor star appearing ${doubleTianYi.count} times in succession creates a powerful wealth magnet. Financial opportunities multiply, and money comes from multiple legitimate sources. This is the configuration of significant wealth accumulation.</p></div>`;
-            }
-
-            if (tianYiStars.length > 0) {
-                wealthText += `<p><span class="success">✓ Tian Yi (${starChinese['Tian Yi']}) Present</span><br>`;
-                wealthText += `You have ${tianYiStars.length} instance(s) of the primary wealth star:</p><ul style="margin: 5px 0 10px 20px;">`;
-                tianYiStars.forEach(s => {
-                    let strengthNote = s.strength === 'strongest' ? 'Maximum wealth energy!' : 
-                                       (s.strength === 'strong' ? 'Strong wealth influence.' :
-                                       (s.strength === 'weak' ? 'Moderate wealth energy—needs activation.' : 'Subtle wealth energy—requires cultivation.'));
-                    wealthText += `<li><span class="flow-ref">${s.displayDigits}</span> - <span class="tag tag-${s.strength}">${s.strengthCn}</span> ${strengthNote}</li>`;
-                });
-        wealthText += `</ul><p>This indicates money through legitimate channels—salary, investments, business. The energy supports accumulation and smart financial decisions.</p>`;
-            }
-
-            if (shengQiStars.length > 0) {
-                wealthText += `<p><span class="success">✓ Sheng Qi (${starChinese['Sheng Qi']}) Present</span><br>`;
-                wealthText += `Found at:</p><ul style="margin: 5px 0 10px 20px;">`;
-                shengQiStars.forEach(s => {
-            wealthText += `<li><span class="flow-ref">${s.displayDigits}</span> - <span class="tag tag-${s.strength}">${s.strengthCn}</span></li>`;
+            item.appendChild(itemTitle);
+            item.appendChild(itemDesc);
+            specialPatternsCard.appendChild(item);
         });
-        wealthText += `</ul><p>Wealth through opportunity and connections. This isn't passive income—it's money that comes from being in the right place, knowing the right people, and seizing moments.</p>`;
+        
+        container.appendChild(specialPatternsCard);
+    }
+
+    // Define stars for Life Story analysis
+    let rootStars = stars.slice(0, Math.min(3, stars.length));
+    let journeyStars = stars.length > 3 ? stars.slice(3, -1) : [];
+    let fruitStar = stars[stars.length - 1];
+
+    // Your Life Story - Coherent narrative integrating Root, Journey, Fruit + Wealth, Career, Relationships, Health
+            let lifeStory = `<div class="narrative-text" style="line-height: 1.8; color: #374151;">`;
+            lifeStory += `<p style="font-size: 15px; margin-bottom: 20px;">Based on your complete energy profile, here is your life story:</p>`;
+            
+            // === FOUNDATION (Root) ===
+            let foundationNarrative = "";
+            if (rootStars.length > 0) {
+                const rootStarCounts = {};
+                rootStars.forEach(s => {
+                    rootStarCounts[s.n] = (rootStarCounts[s.n] || 0) + 1;
+                });
+                const dominantRootStar = Object.keys(rootStarCounts).reduce((a, b) => 
+                    rootStarCounts[a] > rootStarCounts[b] ? a : b
+                );
+                
+                const rootGoodCount = rootStars.filter(s => s.p === 'good').length;
+                const rootBadCount = rootStars.filter(s => s.p === 'bad').length;
+                
+                foundationNarrative += `Your life's foundation is anchored by <strong>${rootStars.length}</strong> core energy pattern${rootStars.length > 1 ? 's' : ''}, with <strong>${dominantRootStar} (${starChinese[dominantRootStar]})</strong> as the dominant force in your origin. `;
+                
+                // Foundation transitions
+                if (rootStars.length > 1) {
+                    const rootTransitions = analyzeSequence(rootStars);
+                    if (rootTransitions.length > 0) {
+                        foundationNarrative += `The foundational transitions reveal: `;
+                        rootTransitions.forEach((trans, idx) => {
+                            if (trans.comboEffect) {
+                                foundationNarrative += `"${trans.comboEffect}" from <span class="flow-ref">${trans.from.displayDigits}</span> to <span class="flow-ref">${trans.to.displayDigits}</span>`;
+                                if (idx < rootTransitions.length - 1) foundationNarrative += `; `;
+                            }
+                        });
+                        foundationNarrative += `. `;
+                    }
+                }
+                
+                if (rootGoodCount > rootBadCount) {
+                    foundationNarrative += `This auspicious foundation provides a <span class="text-good">strong starting point</span>—your early life and initial opportunities are blessed with favorable energy. `;
+                } else if (rootBadCount > rootGoodCount) {
+                    foundationNarrative += `This challenging foundation requires <span class="text-bad">resilience from the start</span>—your origins demand strength, but overcoming early obstacles builds character. `;
+            } else {
+                    foundationNarrative += `This balanced foundation offers <span class="text-neutral">moderate beginnings</span>—neither dramatically favorable nor severely challenging. `;
+                }
+            }
+            
+            // === JOURNEY (Process) ===
+            let journeyNarrative = "";
+            if (journeyStars.length > 0) {
+                const journeyTransitions = analyzeSequence([...rootStars.slice(-1), ...journeyStars]);
+                const journeyGoodCount = journeyStars.filter(s => s.p === 'good').length;
+                const journeyBadCount = journeyStars.filter(s => s.p === 'bad').length;
+                
+                journeyNarrative += `As you move through life's middle phase, you navigate <strong>${journeyStars.length}</strong> energy transition${journeyStars.length > 1 ? 's' : ''}. `;
+                
+                if (journeyTransitions.length > 0) {
+                    journeyNarrative += `Key transitions include: `;
+                    journeyTransitions.forEach((trans, idx) => {
+                        if (trans.comboEffect) {
+                            journeyNarrative += `"${trans.comboEffect}" at <span class="flow-ref">${trans.from.displayDigits}</span> → <span class="flow-ref">${trans.to.displayDigits}</span>`;
+                        } else if (trans.transitionType === 'drain') {
+                            journeyNarrative += `energy drain from <strong>${trans.from.n}</strong> to <strong>${trans.to.n}</strong>`;
+                        } else if (trans.transitionType === 'redemption') {
+                            journeyNarrative += `redemption arc from <strong>${trans.from.n}</strong> challenges to <strong>${trans.to.n}</strong> rewards`;
+                        } else if (trans.transitionType === 'amplification') {
+                            journeyNarrative += `amplification from <strong>${trans.from.n}</strong> to <strong>${trans.to.n}</strong>`;
+                        }
+                        if (idx < journeyTransitions.length - 1) journeyNarrative += `; `;
+                    });
+                    journeyNarrative += `. `;
+                }
+                
+                if (journeyGoodCount > journeyBadCount) {
+                    journeyNarrative += `Your journey phase is <span class="text-good">predominantly favorable</span>—you navigate life's challenges with supportive energy. `;
+                } else if (journeyBadCount > journeyGoodCount) {
+                    journeyNarrative += `Your journey phase contains <span class="text-bad">significant challenges</span>—this is your testing ground where resilience is built. `;
+            } else {
+                    journeyNarrative += `Your journey phase is <span class="text-neutral">balanced</span>—a mix of opportunities and obstacles. `;
+                }
+            }
+            
+            // === OUTCOME (Fruit) ===
+            let outcomeNarrative = "";
+            outcomeNarrative += `Your number concludes with <strong>${fruitStar.n} (${starChinese[fruitStar.n]})</strong> at <span class="tag tag-${fruitStar.strength}">${fruitStar.strengthCn}</span> strength, represented by <span class="flow-ref">${fruitStar.displayDigits}</span>. `;
+            outcomeNarrative += `This final energy pattern carries <strong>1.5x weight</strong> in determining your ultimate outcomes. `;
+            
+            if (journeyStars.length > 0) {
+                const finalTransition = analyzeSequence([journeyStars[journeyStars.length - 1], fruitStar]);
+                if (finalTransition.length > 0 && finalTransition[0].comboEffect) {
+                    outcomeNarrative += `The final transition "${finalTransition[0].comboEffect}" shapes your destination. `;
+                }
+            }
+            
+            if (fruitStar.n === 'Jue Ming') {
+                outcomeNarrative += `Critically, your number ends with <strong>Jue Ming (绝命)</strong>—the most extreme star. The principle 绝命结尾 = 留不住钱 (Jue Ming ending = Cannot keep money) applies: even if wealth or success accumulates during your journey, the final outcome energy makes retention difficult. `;
+            } else if (fruitStar.n === 'Wu Gui') {
+                outcomeNarrative += `Your number ends with <strong>Wu Gui (五鬼)</strong>—unpredictable outcomes. Final results can shift suddenly, requiring backup plans and careful verification of all deals. `;
+            } else if (fruitStar.n === 'Tian Yi') {
+                outcomeNarrative += `Favorably, your number ends with <strong>Tian Yi (天医)</strong>—excellent for wealth preservation. The principle 天医结尾 = 守财有方 (Tian Yi ending = Wealth preservation) means what you build can last. `;
+            } else if (fruitStar.n === 'Yan Nian') {
+                outcomeNarrative += `Your number ends with <strong>Yan Nian (延年)</strong>—strong for career success. The principle 延年结尾 = 事业有成 (Yan Nian ending = Career success) indicates hard work pays off in the end. `;
+            } else if (fruitStar.p === 'bad') {
+                outcomeNarrative += `The <strong>${fruitStar.n} (${starChinese[fruitStar.n]})</strong> ending requires extra vigilance in the areas it governs. `;
+            }
+            
+            // Wealth narrative
+            let wealthNarrative = "";
+            if (tianYiStars.length > 0) {
+                const tianYiCount = tianYiStars.length;
+                const strongestTianYi = tianYiStars.find(s => s.strength === 'strongest');
+                wealthNarrative += `Your financial path is blessed with <strong>Tian Yi (天医)</strong> energy—the primary wealth star. `;
+                if (tianYiCount > 1) {
+                    wealthNarrative += `With ${tianYiCount} instances, this creates a powerful wealth magnet. `;
+                }
+                wealthNarrative += `Money flows through legitimate channels: salary, investments, and business ventures. `;
+                if (strongestTianYi) {
+                    wealthNarrative += `The presence of strong Tian Yi at <span class="flow-ref">${strongestTianYi.displayDigits}</span> indicates significant wealth accumulation potential. `;
+                }
+            } else if (shengQiStars.length > 0) {
+                wealthNarrative += `Your wealth comes through <strong>Sheng Qi (生气)</strong>—opportunities and connections rather than direct accumulation. `;
+                wealthNarrative += `Money arrives when you're in the right place, know the right people, and seize moments. `;
             }
 
             if (jueMingStars.length > 0 || wuGuiStars.length > 0) {
-                wealthText += `<div class="warning-box"><strong>Wealth Risk Factors:</strong><br>`;
-                if (doubleJueMing) {
-            wealthText += `• <strong>⚠️ DOUBLE Jue Ming (双绝命)</strong> detected! This is the most extreme wealth volatility pattern. Money comes and goes in dramatic swings.<br>`;
-                } else if (jueMingStars.length > 0) {
-            wealthText += `• <strong>Jue Ming (${starChinese['Jue Ming']})</strong> present—wealth volatility risk<br>`;
+                wealthNarrative += `However, `;
+                if (jueMingStars.length > 0) {
+                    wealthNarrative += `<strong>Jue Ming (绝命)</strong> introduces wealth volatility—money may come but retention is challenging. `;
                 }
-                if (doubleWuGui) {
-            wealthText += `• <strong>⚠️ DOUBLE Wu Gui (双五鬼)</strong> detected! Extreme unpredictability with finances.<br>`;
-                } else if (wuGuiStars.length > 0) {
-            wealthText += `• <strong>Wu Gui (${starChinese['Wu Gui']})</strong> present—unpredictability risk<br>`;
+            if (wuGuiStars.length > 0) {
+                    wealthNarrative += `<strong>Wu Gui (五鬼)</strong> brings unpredictability to finances. `;
                 }
-                wealthText += `</div>`;
-            }
-
-    if (lastStar && lastStar.n === 'Jue Ming') {
-        wealthText += `<p><span class="warn">⚠ Critical Ending Warning:</span> Your number ends with ${lastStar.n} (${starChinese[lastStar.n]}), which significantly impacts wealth retention. Extra financial discipline is required.</p>`;
-            }
-
-    if (wealthText) {
-            createNarrativeCard("💰 Wealth & Financial Outlook", wealthText, container);
-    }
-
-    // Career Analysis
-            let careerText = "";
-            let doubleYanNian = consecutiveRuns.find(r => r.star === 'Yan Nian');
-            
-            if (doubleYanNian) {
-                let runName = doubleYanNian.count === 2 ? 'Double' : (doubleYanNian.count === 3 ? 'Triple' : `${doubleYanNian.count}x`);
-                careerText += `<div class="insight-box"><strong>🌟 ${runName} Yan Nian (${starChinese['Yan Nian'].repeat(doubleYanNian.count)}) - Exceptional Leadership Configuration</strong><br>`;
-        careerText += `<p>The Longevity star appearing ${doubleYanNian.count} times creates commanding authority. This is the pattern of executives, founders, and those who shape organizations.</p></div>`;
+                wealthNarrative += `Extra financial discipline and safeguards are essential. `;
             }
             
+            if (lastStar && lastStar.n === 'Jue Ming') {
+                wealthNarrative += `Critically, your number ends with <strong>Jue Ming</strong>, meaning 绝命结尾 = 留不住钱 (cannot keep money). `;
+                wealthNarrative += `Even if wealth accumulates, the ending energy makes retention difficult—automatic savings and financial advisors are recommended. `;
+            } else if (lastStar && lastStar.n === 'Tian Yi') {
+                wealthNarrative += `Favorably, your number ends with <strong>Tian Yi</strong>, meaning 天医结尾 = 守财有方 (wealth preservation). `;
+                wealthNarrative += `What you build can last. `;
+            }
+            
+            // Career narrative
+            let careerNarrative = "";
             if (yanNianStars.length > 0) {
-                careerText += `<p><span class="success">✓ Yan Nian (${starChinese['Yan Nian']}) Present</span><br>`;
-                careerText += `Leadership star found at:</p><ul style="margin: 5px 0 10px 20px;">`;
-                yanNianStars.forEach(s => {
-            careerText += `<li><span class="flow-ref">${s.displayDigits}</span> - <span class="tag tag-${s.strength}">${s.strengthCn}</span></li>`;
-        });
-        careerText += `</ul><p>This is the leadership star. It indicates natural authority, the ability to take charge, and respect from peers and superiors.</p>`;
-    }
-
-    if (careerText) {
-            createNarrativeCard("💼 Career & Professional Path", careerText, container);
-    }
-
-    // Relationships Analysis
-            let relText = "";
-            let doubleLiuSha = consecutiveRuns.find(r => r.star === 'Liu Sha');
-            let doubleHuoHai = consecutiveRuns.find(r => r.star === 'Huo Hai');
-
-    relText += `<div class="${selectedGender === 'male' ? 'insight-box' : 'warning-box'}" style="background: ${selectedGender === 'male' ? '#dbeafe' : '#fce7f3'}; border-color: ${selectedGender === 'male' ? '#3b82f6' : '#ec4899'};"><strong>${selectedGender === 'male' ? '♂ Male' : '♀ Female'} Relationship Profile:</strong><br>`;
-    relText += `<span style="font-size: 12px;">${selectedGender === 'male' ? 'Men benefit from Yin-energy partners.' : 'Women benefit from Yang-energy partners.'}</span></div>`;
+                const yanNianCount = yanNianStars.length;
+                const strongestYanNian = yanNianStars.find(s => s.strength === 'strongest');
+                careerNarrative += `In your professional life, <strong>Yan Nian (延年)</strong>—the leadership star—dominates. `;
+                if (yanNianCount > 1) {
+                    careerNarrative += `With ${yanNianCount} instances, this creates commanding authority. `;
+                }
+                careerNarrative += `You possess natural authority, the ability to take charge, and earn respect from peers and superiors. `;
+                if (strongestYanNian) {
+                    careerNarrative += `The strong presence at <span class="flow-ref">${strongestYanNian.displayDigits}</span> indicates executive potential. `;
+                }
+                if (lastStar && lastStar.n === 'Yan Nian') {
+                    careerNarrative += `Your number concludes with Yan Nian, meaning 延年结尾 = 事业有成 (career success)—hard work pays off in the end. `;
+                }
+            } else if (shengQiStars.length > 0) {
+                careerNarrative += `Your career thrives through <strong>Sheng Qi (生气)</strong>—social connections and networking. `;
+                careerNarrative += `Opportunities open through relationships and being in the right social circles. `;
+            }
+            
+            // Relationships narrative
+            let relationshipNarrative = "";
+            if (selectedGender === 'male') {
+                relationshipNarrative += `As a male, you benefit from Yin-energy partners who complement your Yang-dominant patterns. `;
+            } else {
+                relationshipNarrative += `As a female, you benefit from Yang-energy partners. `;
+            }
 
             if (selectedGender === 'female' && yanNianStars.length > 0) {
-                let strongYanNian = yanNianStars.filter(s => s.strength === 'strongest' || s.strength === 'strong');
+                const strongYanNian = yanNianStars.filter(s => s.strength === 'strongest' || s.strength === 'strong');
                 if (strongYanNian.length > 0) {
-                    relText += `<div class="warning-box"><strong>⚠️ Female + Strong Yan Nian (延年) - Relationship Impact:</strong><br>`;
-            relText += `<p>Your strong leadership energy may intimidate some partners or delay marriage as career takes priority. Seek partners who appreciate your strength.</p></div>`;
-        }
-    }
-
-            if (liuShaStars.length > 0) {
-                relText += `<p><span class="highlight">◆ Peach Blossom Energy Active</span><br>`;
-        relText += `Liu Sha (${starChinese['Liu Sha']}) brings strong interpersonal magnetism. You attract attention easily and have natural charm. However, this same energy creates emotional complexity.</p>`;
+                    relationshipNarrative += `However, your strong <strong>Yan Nian</strong> leadership energy may intimidate some partners or delay marriage as career takes priority. `;
+                    relationshipNarrative += `Seek partners who appreciate your strength. `;
+                }
+            }
+            
+            if (tianYiStars.length > 0) {
+                relationshipNarrative += `<strong>Tian Yi (天医)</strong> suggests finding a partner who is helpful, stable, and supportive. `;
+                relationshipNarrative += `Marriage or long-term partnership can be a source of mutual growth. `;
             }
 
-            if (tianYiStars.length > 0) {
-                relText += `<p><span class="success">◆ Supportive Partnership Indicator</span><br>`;
-        relText += `Tian Yi (${starChinese['Tian Yi']}) suggests finding a partner who is helpful, stable, and supportive. Marriage or long-term partnership can be a source of mutual growth.</p>`;
+            if (liuShaStars.length > 0) {
+                relationshipNarrative += `<strong>Liu Sha (六煞)</strong> brings strong interpersonal magnetism—you attract attention easily with natural charm. `;
+                relationshipNarrative += `However, this same energy creates emotional complexity and potential entanglements. `;
             }
 
             if (huoHaiStars.length > 0) {
-                relText += `<p><span class="warn">◆ Communication Friction</span><br>`;
-        relText += `Huo Hai (${starChinese['Huo Hai']}) indicates potential for arguments and verbal conflict in relationships. Learning to pause before responding is essential.</p>`;
-    }
-
-    if (relText) {
-        createNarrativeCard("❤️ Relationships & Connections", relText, container);
-    }
-
-    // Health Analysis
-            let healthText = "";
-    let healthNotes = [];
-    if (jueMingStars.length > 0) healthNotes.push(`<span class="text-bad">Jue Ming</span> suggests monitoring liver, kidney, and urinary systems`);
-    if (wuGuiStars.length > 0) healthNotes.push(`<span class="text-bad">Wu Gui</span> points to blood pressure, heart, and immune considerations`);
-    if (huoHaiStars.length > 0) healthNotes.push(`<span class="warn">Huo Hai</span> indicates respiratory and lymphatic areas`);
-    if (liuShaStars.length > 0) healthNotes.push(`<span class="warn">Liu Sha</span> relates to skin, digestion, and emotional wellbeing`);
-    if (yanNianStars.length > 0) healthNotes.push(`<span class="text-good">Yan Nian</span> (overwork type) suggests watching for stress, insomnia, and neck/shoulder tension`);
-    
-    if (healthNotes.length > 0) {
-                healthText += `<p><strong>Health Areas to Monitor:</strong></p><ul style="margin: 5px 0 15px 20px;">`;
-        healthNotes.forEach(note => {
-            healthText += `<li>${note}</li>`;
-                });
-                healthText += `</ul>`;
+                relationshipNarrative += `<strong>Huo Hai (祸害)</strong> indicates potential for arguments and verbal conflict. `;
+                relationshipNarrative += `Learning to pause before responding is essential for relationship harmony. `;
+            }
+            
+            // Health narrative
+            let healthNarrative = "";
+            const healthConcerns = [];
+            if (jueMingStars.length > 0) healthConcerns.push('liver, kidney, and urinary systems');
+            if (wuGuiStars.length > 0) healthConcerns.push('blood pressure, heart, and immune system');
+            if (huoHaiStars.length > 0) healthConcerns.push('respiratory and lymphatic areas');
+            if (liuShaStars.length > 0) healthConcerns.push('skin, digestion, and emotional wellbeing');
+            if (yanNianStars.length > 0) healthConcerns.push('stress, insomnia, and neck/shoulder tension from overwork');
+            
+            if (healthConcerns.length > 0) {
+                healthNarrative += `Health-wise, monitor: ${healthConcerns.join('; ')}. `;
             }
 
             if (tianYiStars.length > 0) {
-        healthText += `<div class="insight-box"><strong>✨ Protective Factor:</strong> Tian Yi (天医) is present, which supports health and recovery. This can help offset other health concerns.</div>`;
-    }
-
-    if (healthText) {
-        createNarrativeCard("🏥 Health Indicators", healthText, container);
-    }
-    
-    // Strategic Recommendations section
-    let stratText = `<div class="narrative-text">`;
-            stratText += `<p>Based on the complete flow analysis of <span class="flow-ref">${input}</span>, here are targeted recommendations:</p>`;
-
-    if (lastStar) {
-        stratText += `<div class="${lastStar.p === 'bad' ? 'warning-box' : (lastStar.p === 'good' ? 'insight-box' : 'narrative-card')}">`;
-            stratText += `<strong>🏁 Critical: End Result Analysis</strong><br>`;
-            stratText += `Your number ends with <strong>${lastStar.n} (${starChinese[lastStar.n]})</strong> at <span class="tag tag-${lastStar.strength}">${lastStar.strengthCn}</span> strength.<br><br>`;
+                healthNarrative += `Protectively, <strong>Tian Yi (天医)</strong> supports health and recovery, which can help offset other health concerns. `;
+            }
             
-            if (lastStar.n === 'Jue Ming') {
-                stratText += `<span class="warn">⚠️ 绝命结尾 = 留不住钱 (Jue Ming ending = Cannot keep money)</span><br>`;
-                stratText += `This is the most critical warning. Money earned will flow out through impulsive decisions, unexpected events, or losses. Even if you accumulate wealth mid-journey, the ending energy suggests difficulty retaining it. <strong>Recommendation:</strong> Set up automatic savings, avoid impulse purchases, have someone else manage large financial decisions.`;
-            } else if (lastStar.n === 'Tian Yi') {
-                stratText += `<span class="success">✨ 天医结尾 = 守财有方 (Tian Yi ending = Wealth preservation)</span><br>`;
-                stratText += `Excellent ending! Wealth accumulated is retained. Final outcomes favor financial stability. The journey may have challenges but the destination is prosperous.`;
-        }
-                    stratText += `</div>`;
+            // Combine into one flowing narrative - like reading a life story in a book
+            // All content synthesized into continuous paragraphs without sub-categories
+            lifeStory += `<p style="margin-bottom: 20px; line-height: 1.9; text-align: justify;">${foundationNarrative}`;
+            if (journeyNarrative) {
+                lifeStory += journeyNarrative;
+            }
+            lifeStory += outcomeNarrative;
+            lifeStory += `</p>`;
+            
+            lifeStory += `<p style="margin-bottom: 20px; line-height: 1.9; text-align: justify;">${wealthNarrative}`;
+            if (careerNarrative) {
+                lifeStory += careerNarrative;
+            }
+            lifeStory += relationshipNarrative;
+            if (healthNarrative) {
+                lifeStory += healthNarrative;
+            }
+            lifeStory += `</p>`;
+            
+            lifeStory += `</div>`;
+            createNarrativeCard("📖 Your Life Story", lifeStory, container);
+
+    // All Wealth, Career, Relationships, Health information is now integrated into "Your Life Story" above
+    
+    // Strategic Recommendations - Concise: What numbers to add/remove and why
+    let stratText = `<div class="narrative-text">`;
+            
+            // Calculate change recommendation level
+            let changeScore = 0;
+            let changeReasons = [];
+            
+            if (lastStar && lastStar.p === 'bad') {
+                changeScore += 40; // Bad ending is critical
+                changeReasons.push('Bad ending star (1.5x weight)');
+            }
+            if (missingStars.length > 0) {
+                changeScore += missingStars.length * 10;
+                changeReasons.push(`${missingStars.length} missing good star${missingStars.length > 1 ? 's' : ''}`);
+            }
+            if (jueMingStars.length > 1 || wuGuiStars.length > 1) {
+                changeScore += 20;
+                changeReasons.push('Multiple problematic stars');
+            }
+            if (specialPatterns.some(p => p.type === 'warning')) {
+                changeScore += 15;
+                changeReasons.push('Warning patterns detected');
+            }
+            
+            // Determine recommendation level
+            let recommendationLevel, recommendationText, recommendationColor, recommendationBg;
+            if (changeScore >= 50) {
+                recommendationLevel = 'strongly-suggested';
+                recommendationText = 'Strongly Suggested to Change';
+                recommendationColor = '#991b1b';
+                recommendationBg = 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)';
+            } else if (changeScore >= 30) {
+                recommendationLevel = 'recommended';
+                recommendationText = 'Recommended to Change';
+                recommendationColor = '#d97706';
+                recommendationBg = 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)';
+            } else if (changeScore >= 15) {
+                recommendationLevel = 'consider';
+                recommendationText = 'Consider Changing';
+                recommendationColor = '#ca8a04';
+                recommendationBg = 'linear-gradient(135deg, #fefce8 0%, #fef9c3 100%)';
+            } else if (changeScore > 0) {
+                recommendationLevel = 'optional';
+                recommendationText = 'Optional Improvement';
+                recommendationColor = '#65a30d';
+                recommendationBg = 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)';
+            } else {
+                recommendationLevel = 'no-change';
+                recommendationText = 'No Change Required';
+                recommendationColor = '#059669';
+                recommendationBg = 'linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)';
+            }
+            
+            // Visual gradient scale
+            stratText += `<div style="margin-bottom: 25px; padding: 20px; background: ${recommendationBg}; border-radius: 12px; border: 2px solid ${recommendationColor}; text-align: center;">`;
+            stratText += `<div style="font-size: 18px; font-weight: 700; color: ${recommendationColor}; margin-bottom: 12px;">${recommendationText}</div>`;
+            stratText += `<div style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0; padding: 0 10px;">`;
+            stratText += `<span style="font-size: 12px; color: #991b1b; font-weight: 600;">Strongly Suggested</span>`;
+            stratText += `<div style="flex: 1; height: 8px; margin: 0 15px; background: linear-gradient(90deg, #ef4444 0%, #f59e0b 25%, #eab308 50%, #84cc16 75%, #10b981 100%); border-radius: 4px; position: relative;">`;
+            // Position indicator based on changeScore (0-100 scale)
+            const indicatorPosition = Math.min(100, Math.max(0, changeScore));
+            stratText += `<div style="position: absolute; left: ${indicatorPosition}%; top: 50%; transform: translate(-50%, -50%); width: 16px; height: 16px; background: ${recommendationColor}; border: 2px solid white; border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.2);"></div>`;
+            stratText += `</div>`;
+            stratText += `<span style="font-size: 12px; color: #059669; font-weight: 600;">No Change</span>`;
+            stratText += `</div>`;
+            if (changeReasons.length > 0) {
+                stratText += `<p style="font-size: 13px; color: #6b7280; margin-top: 10px;">Based on: ${changeReasons.join(', ')}</p>`;
+            }
+            stratText += `</div>`;
+            
+            stratText += `<p style="font-size: 15px; margin-bottom: 20px; font-weight: 600; margin-top: 25px;">Numbers to Add or Remove</p>`;
+
+            let numberChanges = [];
+            
+            // 1. Most Critical: Ending Star Analysis
+            if (lastStar && lastStar.p === 'bad') {
+                // Suggest replacing bad ending with good ending
+                let suggestedEndings = [];
+            if (selectedGender === 'male') {
+                    suggestedEndings = ['13', '31', '68', '86']; // Yang Tian Yi - best for wealth
+            } else {
+                    suggestedEndings = ['49', '94', '27', '72']; // Yin Tian Yi - good for wealth
                 }
                 
+                numberChanges.push({
+                    priority: 'critical',
+                    action: 'Replace ending',
+                    current: `${lastStar.displayDigits} (${lastStar.n} ${starChinese[lastStar.n]})`,
+                    suggested: suggestedEndings.join(', '),
+                    reasoning: `Your number ends with <strong>${lastStar.n} (${starChinese[lastStar.n]})</strong>, which carries 1.5x weight in determining outcomes—making this the most critical position in your entire number. ` +
+                        (lastStar.n === 'Jue Ming' ? 
+                            `The principle 绝命结尾 = 留不住钱 (Jue Ming ending = Cannot keep money) means that even if you successfully accumulate wealth throughout your journey, the final outcome energy makes retention extremely difficult. Money flows out through impulsive decisions, unexpected events, or losses. ` +
+                            `Replacing the ending with <strong>Tian Yi (天医)</strong> pairs like ${suggestedEndings.join(', ')} would create 天医结尾 = 守财有方 (Tian Yi ending = Wealth preservation). ` +
+                            `This transformation means that wealth accumulated during your journey can be retained and preserved. The ending star's 1.5x weight would then work in your favor, ensuring long-term financial stability rather than volatility. ` +
+                            `This single change addresses the most critical weakness in your number configuration.` :
+                        lastStar.n === 'Wu Gui' ?
+                            `Wu Gui (五鬼) endings create unpredictable final outcomes where results can shift suddenly. The 1.5x weight amplifies this unpredictability, making it difficult to rely on any outcome until fully completed. ` +
+                            `Replacing with <strong>Tian Yi (天医)</strong> pairs like ${suggestedEndings.join(', ')} stabilizes the ending, ensuring predictable and favorable results. ` +
+                            `Instead of uncertainty, you gain wealth preservation energy. This change transforms your final outcomes from unpredictable to stable, allowing you to plan long-term with confidence. ` +
+                            `The ending position is crucial because it determines how your entire journey's energy culminates.` :
+                            `This bad ending star undermines your journey's positive energy. The 1.5x weight means that even positive patterns earlier in your number can be negated by this challenging ending. ` +
+                            `Replacing with <strong>Tian Yi (天医)</strong> pairs like ${suggestedEndings.join(', ')} transforms the outcome from challenging to prosperous. ` +
+                            `You would gain wealth preservation energy at the most critical position, ensuring that all your efforts and positive energy throughout the journey are protected and retained. ` +
+                            `This change maximizes the return on your positive energy patterns by securing them with a favorable ending.`)
+                });
+            }
+            
+            // 2. Missing Critical Good Stars
+            if (missingStars.length > 0) {
+                missingStars.forEach(missing => {
+                    let suggestedPairs = [];
+                    if (missing.star === 'Tian Yi') {
+                        suggestedPairs = selectedGender === 'male' ? ['13', '31', '68', '86'] : ['49', '94', '27', '72'];
+                    } else if (missing.star === 'Sheng Qi') {
+                        suggestedPairs = selectedGender === 'male' ? ['14', '41', '28', '82'] : ['67', '76', '39', '93'];
+                    } else if (missing.star === 'Yan Nian') {
+                        suggestedPairs = selectedGender === 'male' ? ['19', '91', '78', '87'] : ['34', '43', '26', '62'];
+                    } else if (missing.star === 'Fu Wei') {
+                        suggestedPairs = ['11', '22', '88', '99'];
+                    }
+                    
+                    if (suggestedPairs.length > 0) {
+                        numberChanges.push({
+                            priority: 'high',
+                            action: 'Add',
+                            current: `Missing ${missing.star} (${starChinese[missing.star]})`,
+                            suggested: suggestedPairs.join(', '),
+                            reasoning: `Adding <strong>${missing.star} (${starChinese[missing.star]})</strong> pairs like ${suggestedPairs.join(', ')} would introduce ${missing.star === 'Tian Yi' ? 'primary wealth accumulation energy—the most important star for financial success. This energy supports money through legitimate channels like salary, investments, and business ventures' : 
+                                missing.star === 'Sheng Qi' ? 'opportunity and networking energy—the star that opens doors through connections and social magnetism. This energy brings opportunities when you\'re in the right place with the right people' :
+                                missing.star === 'Yan Nian' ? 'leadership and authority energy—the star that creates natural authority and respect. This energy supports career advancement and taking charge' :
+                                'stability and patience energy—the star that provides steady progress and strategic thinking'}. ` +
+                                `Currently, ${missing.risk.toLowerCase()}. ` +
+                                `${missing.description} ` +
+                                `By adding these pairs, you compensate for this gap in your energy profile. ` +
+                                `${missing.impact} ` +
+                                `The introduction of ${missing.star === 'Tian Yi' ? 'Tian Yi' : missing.star === 'Sheng Qi' ? 'Sheng Qi' : missing.star === 'Yan Nian' ? 'Yan Nian' : 'Fu Wei'} energy would create a more balanced and complete energy configuration, addressing this blind spot in your number.`
+                        });
+                    }
+                });
+            }
+            
+            // 3. Replace problematic patterns in the number
+            // Check for problematic bad stars that could be replaced
+            const badStarsToReplace = [];
+            if (jueMingStars.length > 1) {
+                badStarsToReplace.push({star: 'Jue Ming', count: jueMingStars.length, reason: 'Multiple Jue Ming creates extreme volatility'});
+            }
+            if (wuGuiStars.length > 1) {
+                badStarsToReplace.push({star: 'Wu Gui', count: wuGuiStars.length, reason: 'Multiple Wu Gui amplifies unpredictability'});
+            }
+            
+            badStarsToReplace.forEach(problem => {
+                let replacementPairs = [];
+                if (selectedGender === 'male') {
+                    replacementPairs = ['13', '31', '68', '86', '14', '41']; // Tian Yi or Sheng Qi
+                } else {
+                    replacementPairs = ['49', '94', '27', '72', '67', '76']; // Yin Tian Yi or Sheng Qi
+                }
+                
+                numberChanges.push({
+                    priority: 'high',
+                    action: 'Replace',
+                    current: `${problem.count}x ${problem.star} (${starChinese[problem.star]})`,
+                    suggested: replacementPairs.join(', '),
+                    reasoning: `Replacing ${problem.count} instances of <strong>${problem.star} (${starChinese[problem.star]})</strong> with <strong>Tian Yi (天医)</strong> or <strong>Sheng Qi (生气)</strong> pairs like ${replacementPairs.join(', ')} would significantly reduce ${problem.reason.toLowerCase()}. ` +
+                        `${problem.star === 'Jue Ming' ? 
+                            `Multiple Jue Ming (绝命) creates extreme volatility where everything becomes all-or-nothing. This pattern makes financial stability nearly impossible and creates constant risk. ` :
+                            `Multiple Wu Gui (五鬼) amplifies unpredictability to dangerous levels, making planning and stability extremely difficult. `}` +
+                        `By replacing these with <strong>Tian Yi (天医)</strong> pairs, you gain wealth accumulation and preservation energy. ` +
+                        `By replacing with <strong>Sheng Qi (生气)</strong> pairs, you gain opportunity and networking energy that opens doors. ` +
+                        `This substitution transforms negative volatility into positive accumulation and opportunity energy. ` +
+                        `Instead of energy that drains and creates chaos, you gain energy that builds and creates stability. ` +
+                        `The cumulative effect of multiple bad stars is multiplicative—replacing them creates a cascading positive effect throughout your entire number configuration.`
+                });
+            });
+            
+            // 4. Special Pattern Mitigation
+            specialPatterns.forEach(pattern => {
+                if (pattern.type === 'warning' && pattern.name.includes('财来财去')) {
+                    // Wealth Comes and Goes pattern - suggest adding Tian Yi after
+                    let suggestedPairs = selectedGender === 'male' ? ['13', '31', '68', '86'] : ['49', '94', '27', '72'];
+                    numberChanges.push({
+                        priority: 'high',
+                        action: 'Add after pattern',
+                        current: `${pattern.stars[0].displayDigits} → ${pattern.stars[1].displayDigits} (${pattern.name})`,
+                        suggested: suggestedPairs.join(', '),
+                        reasoning: `The pattern "${pattern.name}" at ${pattern.stars.map(s => s.displayDigits).join(' → ')} creates wealth generation but difficulty retaining it. ` +
+                            `This pattern means you have talent for generating wealth or opportunities, but the subsequent energy drains your gains. ` +
+                            `Adding <strong>Tian Yi (天医)</strong> pairs like ${suggestedPairs.join(', ')} after this sequence would create a "Wealth → Preserved Steadily" flow (天医结尾 = 守财有方). ` +
+                            `Instead of wealth flowing out, the Tian Yi energy would lock in and preserve what you've generated. ` +
+                            `This transforms the pattern from "wealth comes and goes" to "wealth comes and stays." ` +
+                            `The strategic placement after the wealth generation point ensures that accumulated gains are protected rather than lost. ` +
+                            `This single addition can dramatically improve your financial retention while maintaining your wealth generation ability.`
+                    });
+                }
+            });
+
+            // Display recommendations
+            if (numberChanges.length > 0) {
+                // Sort by priority
+                const priorityOrder = {critical: 0, high: 1, medium: 2};
+                numberChanges.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
+                
+                numberChanges.forEach((change, idx) => {
+                    const priorityColor = change.priority === 'critical' ? '#991b1b' : '#1f2937';
+                    const priorityBg = change.priority === 'critical' ? 'rgba(239, 68, 68, 0.1)' : '#f9fafb';
+                    const priorityBorder = change.priority === 'critical' ? '#ef4444' : '#e5e7eb';
+                    
+                    stratText += `<div style="margin-bottom: 20px; padding: 18px; background: ${priorityBg}; border-left: 4px solid ${priorityBorder}; border-radius: 8px;">`;
+                    stratText += `<strong style="font-size: 15px; color: ${priorityColor}; display: block; margin-bottom: 12px;">${idx + 1}. ${change.action}: ${change.current}</strong>`;
+                    stratText += `<p style="margin-bottom: 10px; color: #374151;"><strong>Add/Use These Numbers:</strong> <code style="background: #f3f4f6; color: #1f2937; padding: 4px 8px; border-radius: 4px; font-weight: 600; font-size: 13px;">${change.suggested}</code></p>`;
+                    stratText += `<p style="color: #6b7280; line-height: 1.8; font-size: 14px; margin-top: 12px;"><strong>Why This Improves Your Life:</strong> ${change.reasoning}</p>`;
                     stratText += `</div>`;
+                });
+            } else {
+                stratText += `<p style="color: #6b7280; font-style: italic;">Your current number configuration is well-balanced. No critical changes recommended.</p>`;
+            }
+                
+            stratText += `</div>`;
     document.getElementById('strategicContainer').innerHTML = stratText;
             }
 
@@ -810,6 +1231,153 @@ function copyReport() {
     }).catch(err => {
         console.error('Failed to copy:', err);
         alert('Failed to copy report. Please try selecting and copying manually.');
+    });
+}
+
+/**
+ * Calculate Life Balance Scores
+ * Separation of Concerns: Pure calculation logic - maps stars to 4 life areas
+ * 
+ * @param {Array} stars - Array of found star objects
+ * @returns {Object} Object with wealth, career, relationships, health scores (0-100)
+ */
+function calculateLifeBalance(stars, selectedGender) {
+    // Base score for each category
+    let wealth = 50;
+    let career = 50;
+    let relationships = 50;
+    let health = 50;
+
+    // Strength multipliers - more conservative
+    const strengthMultipliers = {
+        'strongest': 1.0,
+        'strong': 0.75,
+        'weak': 0.4,
+        'weakest': 0.2
+    };
+
+    stars.forEach(star => {
+        const multiplier = strengthMultipliers[star.strength] || 0.4;
+        // Use a fixed base impact value instead of star.s to avoid double-weighting
+        const baseImpact = 10; // Standard impact unit
+        const weightedValue = baseImpact * multiplier;
+
+        // Wealth calculation - more conservative multipliers
+        if (star.n === 'Tian Yi') {
+            wealth += weightedValue * 2.5; // Primary wealth star
+        } else if (star.n === 'Sheng Qi') {
+            wealth += weightedValue * 1.2; // Wealth through opportunities
+        } else if (star.n === 'Yan Nian') {
+            wealth += weightedValue * 0.8; // Wealth preservation
+        } else if (star.n === 'Fu Wei') {
+            wealth += weightedValue * 0.2; // Slow accumulation
+        } else if (star.n === 'Jue Ming') {
+            wealth -= weightedValue * 2.5; // Severe wealth volatility
+        } else if (star.n === 'Wu Gui') {
+            wealth -= weightedValue * 1.5; // Unpredictable wealth
+        } else if (star.n === 'Huo Hai') {
+            wealth -= weightedValue * 0.3; // Minor negative
+        } else if (star.n === 'Liu Sha') {
+            wealth -= weightedValue * 0.5; // Emotional spending
+        }
+
+        // Career calculation - more conservative multipliers
+        if (star.n === 'Yan Nian') {
+            career += weightedValue * 2.2; // Strong leadership
+        } else if (star.n === 'Sheng Qi') {
+            career += weightedValue * 1.8; // Career through connections
+        } else if (star.n === 'Tian Yi') {
+            career += weightedValue * 1.3; // Career in finance/healthcare
+        } else if (star.n === 'Fu Wei') {
+            career += weightedValue * 0.3; // Steady but slow
+        } else if (star.n === 'Huo Hai') {
+            career += weightedValue * 0.6; // Good for speaking careers
+        } else if (star.n === 'Liu Sha') {
+            career += weightedValue * 0.4; // Good for service industry
+        } else if (star.n === 'Wu Gui') {
+            career -= weightedValue * 1.0; // Unconventional, unstable
+        } else if (star.n === 'Jue Ming') {
+            career -= weightedValue * 0.6; // High-risk career
+        }
+
+        // Relationships calculation
+        // Note: Liu Sha brings charm but also emotional complexity and drama - net negative
+        // Wu Gui causes unstable relationships, affairs, love triangles - strongly negative
+        if (star.n === 'Tian Yi') {
+            relationships += weightedValue * 1.8; // Supportive partnership, good marriage
+        } else if (star.n === 'Sheng Qi') {
+            relationships += weightedValue * 0.9; // Popularity, attracts people
+        } else if (star.n === 'Yan Nian') {
+            // Gender-dependent: positive for men, negative for women
+            if (selectedGender === 'male') {
+                relationships += weightedValue * 0.6; // Leadership helps men
+            } else {
+                relationships -= weightedValue * 1.2; // Strong Yan Nian hurts women's relationships
+            }
+        } else if (star.n === 'Fu Wei') {
+            relationships += weightedValue * 0.2; // Stable but slow
+        } else if (star.n === 'Liu Sha') {
+            // Complex: brings charm but also emotional drama, entanglements, indecision
+            // Net effect is negative due to complications
+            relationships -= weightedValue * 0.6; // Emotional complexity hurts relationships
+        } else if (star.n === 'Huo Hai') {
+            relationships -= weightedValue * 1.8; // Communication conflicts, arguments
+        } else if (star.n === 'Jue Ming') {
+            relationships -= weightedValue * 2.2; // Relationship instability, breakups, high divorce rate
+        } else if (star.n === 'Wu Gui') {
+            relationships -= weightedValue * 1.5; // Unstable relationships, affairs, love triangles
+        }
+
+        // Health calculation - more conservative multipliers
+        if (star.n === 'Tian Yi') {
+            health += weightedValue * 2.2; // Strong health protection
+        } else if (star.n === 'Sheng Qi') {
+            health += weightedValue * 0.6; // Good vitality
+        } else if (star.n === 'Yan Nian') {
+            health += weightedValue * 0.2; // Health but overwork risk
+        } else if (star.n === 'Fu Wei') {
+            health += weightedValue * 0.3; // Stable health
+        } else if (star.n === 'Jue Ming') {
+            health -= weightedValue * 2.5; // Severe: liver/kidney, diabetes, urinary, accident risk
+        } else if (star.n === 'Wu Gui') {
+            health -= weightedValue * 1.8; // Blood pressure, heart, brain, immune system
+        } else if (star.n === 'Huo Hai') {
+            health -= weightedValue * 1.5; // Respiratory, breathing, mouth, lymph
+        } else if (star.n === 'Liu Sha') {
+            health -= weightedValue * 0.8; // Skin, stomach/intestines, emotional depression
+        }
+    });
+
+    // Normalize scores to 0-100 range
+    wealth = Math.max(0, Math.min(100, Math.round(wealth)));
+    career = Math.max(0, Math.min(100, Math.round(career)));
+    relationships = Math.max(0, Math.min(100, Math.round(relationships)));
+    health = Math.max(0, Math.min(100, Math.round(health)));
+
+    return { wealth, career, relationships, health };
+}
+
+/**
+ * Render Life Balance Dashboard
+ * Separation of Concerns: Pure UI logic - displays calculated scores
+ * 
+ * @param {Object} scores - Object with wealth, career, relationships, health scores
+ */
+function renderLifeBalanceDashboard(scores) {
+    const categories = ['wealth', 'career', 'relationships', 'health'];
+    
+    categories.forEach(category => {
+        const score = scores[category];
+        const fillBar = document.getElementById(`${category}-bar`)?.querySelector('.balance-fill');
+        const percentageEl = document.getElementById(`${category}-percentage`);
+        
+        if (fillBar && percentageEl) {
+            // Animate the fill bar
+            setTimeout(() => {
+                fillBar.style.width = `${score}%`;
+                percentageEl.textContent = `${score}%`;
+            }, 100);
+        }
     });
 }
 
