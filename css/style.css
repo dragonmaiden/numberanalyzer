@@ -643,6 +643,308 @@
             font-size: 12px;
         }
 
+        /* Star Card Styles */
+        .star-card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            min-width: 140px;
+            flex: 1;
+            max-width: 180px;
+        }
+
+        .star-card.good {
+            border-left: 4px solid #10b981;
+        }
+
+        .star-card.good.dark {
+            border-left-color: #047857;
+        }
+
+        .star-card.bad {
+            border-left: 4px solid #f87171;
+        }
+
+        .star-card.bad.dark {
+            border-left-color: #dc2626;
+        }
+
+        .star-card.neutral {
+            border-left: 4px solid #6b7280;
+        }
+
+        .star-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .star-card-name {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .star-card-name.good { color: #10b981; }
+        .star-card-name.good.dark { color: #047857; }
+        .star-card-name.bad { color: #f87171; }
+        .star-card-name.bad.dark { color: #dc2626; }
+        .star-card-name.neutral { color: #6b7280; }
+
+        .star-card-chinese {
+            font-size: 13px;
+        }
+
+        .star-card-digits {
+            font-size: 28px;
+            font-weight: 700;
+            color: #0f172a;
+            font-family: 'SF Mono', Monaco, monospace;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .star-card-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .star-card-match-icon {
+            color: #059669;
+            font-size: 14px;
+            margin-left: 4px;
+        }
+
+        /* Phase Section Styles */
+        .phase-section {
+            padding: 20px;
+            border-radius: 16px;
+            margin: 15px 0;
+            border: 1px solid #e5e7eb;
+        }
+
+        .phase-section.phase-origin {
+            background: linear-gradient(135deg, #ffffff 0%, #ecfdf5 100%);
+        }
+
+        .phase-section.phase-journey {
+            background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
+        }
+
+        .phase-section.phase-outcome {
+            background: linear-gradient(135deg, #ffffff 0%, #fffbeb 100%);
+        }
+
+        .phase-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .phase-emoji {
+            font-size: 24px;
+        }
+
+        .phase-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .phase-subtitle {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .phase-cards {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        /* Train Container Enhanced */
+        .train-container-enhanced {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 25px;
+            overflow-x: auto;
+        }
+
+        .train-header {
+            font-size: 11px;
+            color: #6b7280;
+            margin-bottom: 12px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .train-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .train-car-enhanced {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 12px;
+            min-width: 60px;
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        .train-car-enhanced.good {
+            background: #f0fdf4;
+            border: 2px solid #10b981;
+        }
+
+        .train-car-enhanced.good.dark {
+            background: #dcfce7;
+            border-color: #047857;
+        }
+
+        .train-car-enhanced.bad {
+            background: #fff5f5;
+            border: 2px solid #f87171;
+        }
+
+        .train-car-enhanced.bad.dark {
+            background: #fee2e2;
+            border-color: #dc2626;
+        }
+
+        .train-car-enhanced.neutral {
+            background: #ffffff;
+            border: 2px solid #d1d5db;
+        }
+
+        .train-car-enhanced.elongated {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        .train-car-digits {
+            font-size: 22px;
+            font-weight: 700;
+            text-align: center;
+            font-family: 'SF Mono', Monaco, monospace;
+            letter-spacing: 1px;
+        }
+
+        .train-car-star {
+            font-size: 9px;
+            color: #6b7280;
+            text-align: center;
+            margin-top: 2px;
+        }
+
+        .train-car-chinese {
+            font-size: 9px;
+            color: #9ca3af;
+            text-align: center;
+        }
+
+        /* Smart Arrow Connectors */
+        .train-arrow {
+            padding: 0 4px;
+            font-size: 16px;
+        }
+
+        .train-arrow.good-transition {
+            color: #10b981;
+            font-weight: bold;
+        }
+
+        .train-arrow.bad-transition {
+            color: #ef4444;
+            font-weight: bold;
+        }
+
+        .train-arrow.neutral-transition {
+            color: #9ca3af;
+        }
+
+        /* Copy Button */
+        .copy-btn {
+            width: 100%;
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            color: white;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+            margin-top: 20px;
+        }
+
+        .copy-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .copy-btn:active {
+            transform: translateY(0);
+        }
+
+        .copy-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Missing Energy / Blind Spots Card */
+        .blind-spots-card {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 1px solid #fbbf24;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .blind-spots-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #92400e;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .blind-spots-item {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-left: 3px solid #f59e0b;
+        }
+
+        .blind-spots-item-title {
+            font-weight: 600;
+            color: #78350f;
+            margin-bottom: 4px;
+        }
+
+        .blind-spots-item-desc {
+            font-size: 13px;
+            color: #92400e;
+            line-height: 1.6;
+        }
+
         /* Mobile */
         @media (max-width: 600px) {
             body { padding: 15px; }
@@ -685,4 +987,18 @@
             .train-car .digits { font-size: 14px; }
             
             .tag { font-size: 9px; padding: 2px 6px; }
+
+            .star-card {
+                min-width: 100%;
+                max-width: 100%;
+            }
+
+            .train-car-enhanced {
+                min-width: 45px;
+                padding: 8px;
+            }
+
+            .train-car-digits {
+                font-size: 18px;
+            }
         }
