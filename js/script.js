@@ -1,88 +1,88 @@
 // Numerology Calculator - Logic File
 // Contains only business logic functions
 
-        // Gender state
-        let selectedGender = 'male';
-        
-        function setGender(gender) {
-            selectedGender = gender;
-            document.getElementById('maleBtn').classList.toggle('active', gender === 'male');
-            document.getElementById('femaleBtn').classList.toggle('active', gender === 'female');
-            
-            if (gender === 'male') {
-                document.getElementById('genderInfo').textContent = 'Yang patterns (14/41, 13/31, 68/86, 79/97) provide stronger benefits';
-            } else {
-                document.getElementById('genderInfo').textContent = 'Yin patterns (39/93, 67/76, 24/42, 18/81) provide stronger benefits';
-            }
+// Gender state
+let selectedGender = 'male';
+
+function setGender(gender) {
+    selectedGender = gender;
+    document.getElementById('maleBtn').classList.toggle('active', gender === 'male');
+    document.getElementById('femaleBtn').classList.toggle('active', gender === 'female');
+    
+    if (gender === 'male') {
+        document.getElementById('genderInfo').textContent = 'Yang patterns (14/41, 13/31, 68/86, 79/97) provide stronger benefits';
+    } else {
+        document.getElementById('genderInfo').textContent = 'Yin patterns (39/93, 67/76, 24/42, 18/81) provide stronger benefits';
+    }
 }
 
-        // Validation function
-        function validateInputs() {
-            const birthDay = document.getElementById('birthDay').value;
-            const birthMonth = document.getElementById('birthMonth').value;
-            const birthYear = document.getElementById('birthYear').value;
-            const gender = selectedGender;
-            
-            if (!birthDay || !birthMonth || !birthYear) {
-                alert('Please select your complete birthdate for personalized analysis');
-                return false;
-            }
-            if (!gender) {
-                alert('Please select your gender');
-                return false;
-            }
-            return true;
-        }
+// Validation function
+function validateInputs() {
+    const birthDay = document.getElementById('birthDay').value;
+    const birthMonth = document.getElementById('birthMonth').value;
+    const birthYear = document.getElementById('birthYear').value;
+    const gender = selectedGender;
+    
+    if (!birthDay || !birthMonth || !birthYear) {
+        alert('Please select your complete birthdate for personalized analysis');
+        return false;
+    }
+    if (!gender) {
+        alert('Please select your gender');
+        return false;
+    }
+    return true;
+}
 
-        function runFullReport() {
-            const input = document.getElementById('phoneInput').value.replace(/\D/g, '');
-            const results = document.getElementById('results');
-            const loadingOverlay = document.getElementById('loadingOverlay');
-            const analyzeBtn = document.getElementById('analyzeBtn');
-            const copyBtn = document.getElementById('copyBtn');
-            
-            if (input.length < 2) {
-                alert("Please enter a valid number.");
-                return;
-            }
-            
-            if (!validateInputs()) {
-                return;
-            }
+function runFullReport() {
+    const input = document.getElementById('phoneInput').value.replace(/\D/g, '');
+    const results = document.getElementById('results');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const copyBtn = document.getElementById('copyBtn');
+    
+    if (input.length < 2) {
+        alert("Please enter a valid number.");
+        return;
+    }
+    
+    if (!validateInputs()) {
+        return;
+    }
 
-            // Disable button and show loading spinner
-            analyzeBtn.disabled = true;
-            analyzeBtn.textContent = 'Analyzing...';
-            loadingOverlay.classList.add('active');
-            copyBtn.classList.add('hidden');
+    // Disable button and show loading spinner
+    analyzeBtn.disabled = true;
+    analyzeBtn.textContent = 'Analyzing...';
+    loadingOverlay.classList.add('active');
+    copyBtn.classList.add('hidden');
+    
+    // Run analysis after 1 second to show loading animation
+    setTimeout(() => {
+        try {
+            runFlowAndAnalysis(input);
+            results.classList.remove('hidden');
+        } catch (error) {
+            console.error('Analysis error:', error);
+            console.error('Error stack:', error.stack);
+            console.error('Error at:', error.message, error.name);
+            // Show detailed error in console, simple message to user
+            alert(`Error: ${error.message}\n\nCheck browser console (F12) for details.`);
+            // Don't show results if there was an error
+            results.classList.add('hidden');
+        } finally {
+            // Always hide loading spinner and re-enable button, even on error
+            loadingOverlay.classList.remove('active');
+            analyzeBtn.disabled = false;
+            analyzeBtn.textContent = 'Analyze';
+            copyBtn.classList.remove('hidden');
             
-            // Run analysis after 1 second to show loading animation
-            setTimeout(() => {
-                try {
-                runFlowAndAnalysis(input);
-                    results.classList.remove('hidden');
-                } catch (error) {
-                    console.error('Analysis error:', error);
-                    console.error('Error stack:', error.stack);
-                    console.error('Error at:', error.message, error.name);
-                    // Show detailed error in console, simple message to user
-                    alert(`Error: ${error.message}\n\nCheck browser console (F12) for details.`);
-                    // Don't show results if there was an error
-                    results.classList.add('hidden');
-                } finally {
-                    // Always hide loading spinner and re-enable button, even on error
-                loadingOverlay.classList.remove('active');
-                analyzeBtn.disabled = false;
-                analyzeBtn.textContent = 'Analyze';
-                    copyBtn.classList.remove('hidden');
-                
-                    // Only scroll if results are visible
-                    if (!results.classList.contains('hidden')) {
+            // Only scroll if results are visible
+            if (!results.classList.contains('hidden')) {
                 results.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
-                }
-            }, 1000); // 1 second animation duration
+            }
         }
+    }, 1000); // 1 second animation duration
+}
 
         // Get birthdate inputs
         function getBirthdateInputs() {
@@ -325,6 +325,9 @@
     // Build visualization
             let stars = starsFound;
             
+            // Calculate triplePatterns early so it's available for createTrainVisualization
+            const triplePatterns = detectTriplePatterns(starsFound);
+            
             if (stars.length === 0) {
         flowContainer.innerHTML = '<p class="text-neutral" style="text-align:center; padding: 20px;">No valid star patterns found in this number.</p>';
             } else {
@@ -347,7 +350,7 @@
                 }
                 
         // Create train visualization with smart arrows
-        createTrainVisualization(stars, flowContainer);
+        createTrainVisualization(stars, flowContainer, { triplePatterns });
         
         // Create phase sections
         flowContainer.appendChild(
@@ -403,7 +406,10 @@
 
     // Enhanced analysis with new knowledge base
     const zeroAnalysis = analyzeZeroEffects(input, starsFound);
-    const triplePatterns = detectTriplePatterns(starsFound);
+    // triplePatterns is calculated earlier in runFlowAndAnalysis, reuse it here
+    // Note: triplePatterns is already calculated in runFlowAndAnalysis, but we need it here too
+    // Since they're in different scopes, we can recalculate it
+    const triplePatternsForNarrative = detectTriplePatterns(starsFound);
     const healthRisks = analyzeHealthRisks(starsFound);
     const fiveElementAnalysis = analyzeFiveElements(input);
     const numberFortune81 = calculate81Fortune(input);
@@ -411,7 +417,7 @@
 
     generateDeepNarrative(input, starsFound, starsFound[starsFound.length - 1], combosFound, adjustedScore, narrativeContainer, {
         zeroAnalysis,
-        triplePatterns,
+        triplePatterns: triplePatternsForNarrative,
         healthRisks,
         fiveElementAnalysis,
         numberFortune81,
@@ -425,7 +431,7 @@
     updateReportLink(input, selectedGender, adjustedScore, starsFound);
 }
 
-function createTrainVisualization(stars, container) {
+function createTrainVisualization(stars, container, enhancedData = {}) {
                 const trainContainer = document.createElement('div');
     trainContainer.className = 'train-container-enhanced';
     
@@ -489,6 +495,59 @@ function createTrainVisualization(stars, container) {
     
     trainContainer.appendChild(trainHeader);
     trainContainer.appendChild(trainRow);
+    
+    // Add Special Patterns section inside the same container as Number Breakdown
+    const { triplePatterns } = enhancedData || {};
+    const specialPatterns = detectSpecialPatterns(stars);
+    const allSpecialPatterns = [...specialPatterns];
+    if (triplePatterns && triplePatterns.length > 0) {
+        allSpecialPatterns.push(...triplePatterns);
+    }
+    
+    if (allSpecialPatterns.length > 0) {
+        const specialPatternsSection = document.createElement('div');
+        specialPatternsSection.style.marginTop = '30px';
+        specialPatternsSection.style.paddingTop = '25px';
+        specialPatternsSection.style.borderTop = '2px solid #e5e7eb';
+        
+        const title = document.createElement('div');
+        title.className = 'train-header';
+        title.style.marginBottom = '15px';
+        title.innerHTML = '🌟 Special Patterns Detected';
+        specialPatternsSection.appendChild(title);
+        
+        allSpecialPatterns.forEach(pattern => {
+            const item = document.createElement('div');
+            item.style.marginBottom = '15px';
+            item.style.padding = '12px';
+            item.style.background = 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)';
+            item.style.borderLeft = '4px solid #6366f1';
+            item.style.borderRadius = '8px';
+            
+            const itemTitle = document.createElement('div');
+            itemTitle.style.fontWeight = '600';
+            itemTitle.style.color = '#3730a3';
+            itemTitle.style.marginBottom = '8px';
+            itemTitle.style.fontSize = '15px';
+            const icon = pattern.type === 'warning' ? '⚠️' : (pattern.type === 'amplification' ? '✨' : (pattern.type === 'danger' ? '🔮' : '🔮'));
+            itemTitle.textContent = `${icon} ${pattern.name}`;
+            
+            const itemDesc = document.createElement('div');
+            itemDesc.style.color = '#4338ca';
+            itemDesc.style.fontSize = '14px';
+            itemDesc.style.lineHeight = '1.6';
+            const positions = pattern.stars.map(s => s.displayDigits).join(' → ');
+            const description = pattern.description || 'Pattern detected but description not available.';
+            itemDesc.innerHTML = `<strong>Description:</strong> ${description}<br><strong>Found at:</strong> <code style="background: rgba(0,0,0,0.05); padding: 2px 6px; border-radius: 3px; font-family: monospace;">${positions}</code>`;
+            
+            item.appendChild(itemTitle);
+            item.appendChild(itemDesc);
+            specialPatternsSection.appendChild(item);
+        });
+        
+        trainContainer.appendChild(specialPatternsSection);
+    }
+    
     container.appendChild(trainContainer);
 }
 
@@ -759,8 +818,10 @@ function getMissingStarsAnalysis(foundStars) {
                     let description = '';
                     if (comboKey === 'Fu Wei+Wu Gui') {
                         description = 'Fu Wei (伏位) followed by Wu Gui (五鬼) creates a pattern where stillness and waiting suddenly transforms into unpredictable disruption and instability. This combination can lead to unexpected changes and strange illnesses (怪病).';
+                    } else if (danger.healthWarning) {
+                        description = `${pair[0].n} (${starChinese[pair[0].n]}) followed by ${pair[1].n} (${starChinese[pair[1].n]}) creates a dangerous energy pattern. ${danger.healthWarning}`;
                     } else {
-                        description = `${pair[0].n} (${starChinese[pair[0].n]}) followed by ${pair[1].n} (${starChinese[pair[1].n]}) creates a dangerous energy pattern. ${danger.healthWarning || ''}`;
+                        description = `${pair[0].n} (${starChinese[pair[0].n]}) followed by ${pair[1].n} (${starChinese[pair[1].n]}) creates a dangerous energy pattern.`;
                     }
                     
                     patterns.push({
@@ -787,7 +848,7 @@ function getMissingStarsAnalysis(foundStars) {
                         patterns.push({
                             type: 'rescue',
                             name: `${firstStar} + ${rescue.solution}`,
-                            description: rescue.description,
+                            description: rescue.description || `${firstStar} (${starChinese[firstStar]}) is neutralized by ${triple[1].n} (${starChinese[triple[1].n]}).`,
                             stars: triple.slice(0, 2),
                             position: i + 1
                         });
@@ -802,11 +863,16 @@ function getMissingStarsAnalysis(foundStars) {
                 
                 if (beneficialChains[comboKey]) {
                     const benefit = beneficialChains[comboKey];
+                    let description = benefit.effect || '';
+                    if (benefit.warning) {
+                        description += (description ? ' ' : '') + `Warning: ${benefit.warning}`;
+                    }
                     patterns.push({
                         type: 'beneficial',
                         name: comboKey,
                         effect: benefit.effect,
                         warning: benefit.warning,
+                        description: description || `${pair[0].n} (${starChinese[pair[0].n]}) followed by ${pair[1].n} (${starChinese[pair[1].n]}) creates a beneficial energy pattern.`,
                         stars: pair,
                         position: i + 1
                     });
@@ -1218,48 +1284,7 @@ function getMissingStarsAnalysis(foundStars) {
         container.appendChild(blindSpotsCard);
     }
 
-    // Enhanced Special Patterns - includes dangerous chains, rescue formulas, beneficial chains
-    const allSpecialPatterns = [...specialPatterns];
-    if (triplePatterns && triplePatterns.length > 0) {
-        allSpecialPatterns.push(...triplePatterns);
-    }
-    
-    if (allSpecialPatterns.length > 0) {
-        const specialPatternsCard = document.createElement('div');
-        specialPatternsCard.className = 'blind-spots-card';
-        specialPatternsCard.style.background = 'linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%)';
-        specialPatternsCard.style.borderColor = '#6366f1';
-        
-        const title = document.createElement('div');
-        title.className = 'blind-spots-title';
-        title.style.color = '#4338ca';
-        title.innerHTML = '🌟 Special Patterns Detected';
-        specialPatternsCard.appendChild(title);
-        
-        allSpecialPatterns.forEach(pattern => {
-            const item = document.createElement('div');
-            item.className = 'blind-spots-item';
-            item.style.borderLeftColor = '#6366f1';
-            
-            const itemTitle = document.createElement('div');
-            itemTitle.className = 'blind-spots-item-title';
-            itemTitle.style.color = '#3730a3';
-            const icon = pattern.type === 'warning' ? '⚠️' : (pattern.type === 'amplification' ? '✨' : '🔮');
-            itemTitle.textContent = `${icon} ${pattern.name}`;
-            
-            const itemDesc = document.createElement('div');
-            itemDesc.className = 'blind-spots-item-desc';
-            itemDesc.style.color = '#4338ca';
-            const positions = pattern.stars.map(s => s.displayDigits).join(' → ');
-            itemDesc.innerHTML = `<strong>Description:</strong> ${pattern.description}<br><strong>Found at:</strong> <code style="background: rgba(0,0,0,0.05); padding: 2px 6px; border-radius: 3px; font-family: monospace;">${positions}</code>`;
-            
-            item.appendChild(itemTitle);
-            item.appendChild(itemDesc);
-            specialPatternsCard.appendChild(item);
-        });
-        
-        container.appendChild(specialPatternsCard);
-    }
+    // Special Patterns section has been moved to right after Number Breakdown
 
     // Helper function to check for rescue formulas
     function checkRescueFormulas(stars) {
@@ -2115,37 +2140,90 @@ function renderLifeBalanceDashboard(scores) {
 // Report link is updated automatically when analysis runs via updateReportLink()
 
 // Initialize birthdate dropdowns
-document.addEventListener('DOMContentLoaded', () => {
-    // Populate day dropdown (1-31)
-    const birthDay = document.getElementById('birthDay');
-    if (birthDay) {
-        for (let i = 1; i <= 31; i++) {
-            const option = document.createElement('option');
-            option.value = i;
-            option.textContent = i;
-            birthDay.appendChild(option);
+// Initialize birthdate dropdowns
+function initializeBirthdateDropdowns() {
+    try {
+        // Populate day dropdown (1-31)
+        const birthDay = document.getElementById('birthDay');
+        if (birthDay) {
+            // Clear existing options except the first placeholder
+            while (birthDay.children.length > 1) {
+                birthDay.removeChild(birthDay.lastChild);
+            }
+            for (let i = 1; i <= 31; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                birthDay.appendChild(option);
+            }
+        }
+        
+        // Populate month dropdown (1-12)
+        const birthMonth = document.getElementById('birthMonth');
+        if (birthMonth) {
+            // Clear existing options except the first placeholder
+            while (birthMonth.children.length > 1) {
+                birthMonth.removeChild(birthMonth.lastChild);
+            }
+            for (let i = 1; i <= 12; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                birthMonth.appendChild(option);
+            }
+        }
+        
+        // Populate year dropdown (1940-current year)
+        const birthYear = document.getElementById('birthYear');
+        if (birthYear) {
+            // Clear existing options except the first placeholder
+            while (birthYear.children.length > 1) {
+                birthYear.removeChild(birthYear.lastChild);
+            }
+            const currentYear = new Date().getFullYear();
+            for (let i = currentYear; i >= 1940; i--) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                birthYear.appendChild(option);
+            }
+        }
+    } catch (error) {
+        console.error('Error initializing birthdate dropdowns:', error);
+    }
+}
+
+// Initialize on DOM ready - use multiple methods to ensure it runs
+(function initDropdowns() {
+    function tryInit() {
+        const birthDay = document.getElementById('birthDay');
+        const birthMonth = document.getElementById('birthMonth');
+        const birthYear = document.getElementById('birthYear');
+        
+        // Only initialize if all elements exist
+        if (birthDay && birthMonth && birthYear) {
+            initializeBirthdateDropdowns();
+            return true;
+        }
+        return false;
+    }
+    
+    // Try immediately if DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!tryInit()) {
+                // If still not ready, try again after a delay
+                setTimeout(tryInit, 100);
+            }
+        });
+    } else {
+        // DOM is already loaded
+        if (!tryInit()) {
+            // If elements don't exist yet, try again after a delay
+            setTimeout(tryInit, 100);
         }
     }
     
-    // Populate month dropdown (1-12)
-    const birthMonth = document.getElementById('birthMonth');
-    if (birthMonth) {
-        for (let i = 1; i <= 12; i++) {
-            const option = document.createElement('option');
-            option.value = i;
-            option.textContent = i;
-            birthMonth.appendChild(option);
-        }
-    }
-    
-    // Populate year dropdown (1940-2010)
-    const birthYear = document.getElementById('birthYear');
-    if (birthYear) {
-        for (let i = 2010; i >= 1940; i--) {
-            const option = document.createElement('option');
-            option.value = i;
-            option.textContent = i;
-            birthYear.appendChild(option);
-        }
-    }
-});
+    // Final fallback - try again after 500ms
+    setTimeout(tryInit, 500);
+})();
